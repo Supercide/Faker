@@ -16,21 +16,33 @@ namespace FakR.Tests
         }
 
         [Test]
-        public void GivenKnownTemplate_WhenMatchingStaticContent_ThenCallsTemplateStoreWithBase64Hash()
+        public void GivenKnownTemplate_WhenRetrievingResponses_ThenCallsTemplateStoreWithNameSpace()
         {
-            string content = "{ \"Message:\" \"Hello world\" }";
-
-            SHA1 sha = new SHA1CryptoServiceProvider();
-            // This is one implementation of the abstract class SHA1.
-            string expectedHash = Convert.ToBase64String(sha.ComputeHash(Encoding.UTF8.GetBytes(content)));
+            Uri expectedNamespace = new Uri("http://localhost/anyvalue");
 
             Mock<ITemplateStore> mockTemplateStore = new Mock<ITemplateStore>();
 
             TemplateMatcher templateMatcher = new TemplateMatcher(mockTemplateStore.Object);
 
-            templateMatcher.Match(content);
+            templateMatcher.Match(string.Empty, expectedNamespace);
 
-            mockTemplateStore.Verify(x => x.GetTemplate(It.Is<string>(hash => hash == expectedHash)), Times.Once);
+            mockTemplateStore.Verify(x => x.GetTemplate(It.IsAny<string>(), It.Is<Uri>(@namespace => @namespace == expectedNamespace)), Times.Once);
         }
+
+        // dynamic templates
+        [Test]
+        public void GivenKnownTemplate_WhenRetrievingResponses_ThenCallsTemplateWithContent()
+        {
+            string expectedContent = "{ \"Message:\" \"Hello world\" }";
+
+            Mock<ITemplateStore> mockTemplateStore = new Mock<ITemplateStore>();
+
+            TemplateMatcher templateMatcher = new TemplateMatcher(mockTemplateStore.Object);
+
+            templateMatcher.Match(expectedContent, new Uri("http://anything"));
+
+            mockTemplateStore.Verify(x => x.GetTemplate(It.Is<string>(content => content == expectedContent), It.IsAny<Uri>()), Times.Once);
+        }
+        // matching
     }
 }
