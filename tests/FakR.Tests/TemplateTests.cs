@@ -16,7 +16,7 @@ namespace FakR.Tests
         }
 
         [Test]
-        public void GivenKnownTemplate_WhenRetrievingResponses_ThenCallsTemplateStoreWithNameSpace()
+        public void GivenKnownTemplate_WhenRetrievingTemplates_ThenCallsTemplateStoreWithNameSpace()
         {
             Uri expectedNamespace = new Uri("http://localhost/anyvalue");
 
@@ -26,23 +26,25 @@ namespace FakR.Tests
 
             templateMatcher.Match(string.Empty, expectedNamespace);
 
-            mockTemplateStore.Verify(x => x.GetTemplate(It.IsAny<string>(), It.Is<Uri>(@namespace => @namespace == expectedNamespace)), Times.Once);
+            mockTemplateStore.Verify(x => x.GetTemplates(It.Is<Uri>(@namespace => @namespace == expectedNamespace)), Times.Once);
         }
 
-        // dynamic templates
         [Test]
-        public void GivenKnownTemplate_WhenRetrievingResponses_ThenCallsTemplateWithContent()
+        public void GivenMultipleTemplates_WhenRetrievingTemplates_ThenReturnsTemplateWithMostMatchedFields()
         {
-            string expectedContent = "{ \"Message:\" \"Hello world\" }";
+            string content = "{ \"a:\" \"1\",\"b:\" \"2\",\"c:\" \"3\" }";
+            string templateOne = "{ \"a:\" \"1\" }";
+            string templateTwo = "{ \"a:\" \"1\",\"b:\" \"2\" }";
+            string expectedTemplate = "{ \"a:\" \"1\",\"b:\" \"2\",\"c:\" \"3\" }";
 
             Mock<ITemplateStore> mockTemplateStore = new Mock<ITemplateStore>();
+            mockTemplateStore.Setup(x => x.GetTemplates(It.IsAny<Uri>())).Returns(new string[] {templateOne, templateTwo, expectedTemplate});
 
             TemplateMatcher templateMatcher = new TemplateMatcher(mockTemplateStore.Object);
 
-            templateMatcher.Match(expectedContent, new Uri("http://anything"));
+            string actualTemplate = templateMatcher.Match(content, new Uri("http://anything"));
 
-            mockTemplateStore.Verify(x => x.GetTemplate(It.Is<string>(content => content == expectedContent), It.IsAny<Uri>()), Times.Once);
+            Assert.That(actualTemplate, Is.EqualTo(expectedTemplate));
         }
-        // matching
     }
 }

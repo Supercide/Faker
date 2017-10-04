@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Linq;
 using System.Security.Cryptography;
 using System.Text;
 
@@ -15,12 +16,12 @@ namespace FakR.Core
 
         public string Match(string content, Uri @namespace)
         {
-            return _templateStore.GetTemplate(content, @namespace);
+            return _templateStore.GetTemplates(@namespace).FirstOrDefault();
         }
     }
 
     public interface ITemplateStore
     {
-        string GetTemplate(string contentHash, Uri @namespace);
+        string[] GetTemplates(Uri @namespace);
     }
 }
