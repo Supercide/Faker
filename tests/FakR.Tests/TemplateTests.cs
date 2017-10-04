@@ -7,14 +7,9 @@ using NUnit.Framework;
 
 namespace FakR.Tests
 {
+    [TestFixture]
     public class TemplateTests
     {
-        [OneTimeSetUp]
-        public void SetUp()
-        {
-            
-        }
-
         [Test]
         public void GivenKnownTemplate_WhenRetrievingTemplates_ThenCallsTemplateStoreWithNameSpace()
         {
@@ -32,13 +27,14 @@ namespace FakR.Tests
         [Test]
         public void GivenMultipleTemplates_WhenRetrievingTemplates_ThenReturnsTemplateWithMostMatchedFields()
         {
-            string content = "{ \"a:\" \"1\",\"b:\" \"2\",\"c:\" \"3\" }";
-            string templateOne = "{ \"a:\" \"1\" }";
-            string templateTwo = "{ \"a:\" \"1\",\"b:\" \"2\" }";
-            string expectedTemplate = "{ \"a:\" \"1\",\"b:\" \"2\",\"c:\" \"3\" }";
+            string content = "{ \"a\": \"1\",\"b\": \"2\",\"c\": \"3\" }";
+            string templateOne = "{ \"a\":\"1\" }";
+            string templateTwo = "{ \"a\": \"1\",\"b\": \"2\" }";
+            string expectedTemplate = "{ \"a\": \"1\",\"b\": \"2\",\"c\": \"3\" }";
+            string templateThree = "{ \"a\": \"1\",\"b\": \"2\",\"c\": \"3\", \"d\": \"4\" }";
 
             Mock<ITemplateStore> mockTemplateStore = new Mock<ITemplateStore>();
-            mockTemplateStore.Setup(x => x.GetTemplates(It.IsAny<Uri>())).Returns(new string[] {templateOne, templateTwo, expectedTemplate});
+            mockTemplateStore.Setup(x => x.GetTemplates(It.IsAny<Uri>())).Returns(new string[] {templateOne, templateTwo, templateThree, expectedTemplate });
 
             TemplateMatcher templateMatcher = new TemplateMatcher(mockTemplateStore.Object);
 
