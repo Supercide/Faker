@@ -2,11 +2,12 @@
 using FakR.Core;
 using Moq;
 using NUnit.Framework;
+using NUnit.Framework.Constraints;
 
 namespace FakR.Tests
 {
     [TestFixture]
-    public class TemplateTests
+    public class TemplateMatcherTests
     {
         [Test]
         public void GivenKnownContent_WhenRetrievingTemplates_ThenCallsTemplateStoreWithNameSpace()
@@ -38,14 +39,14 @@ namespace FakR.Tests
 
             var actualTemplate = templateMatcher.Match(content, new Uri("http://anything"));
 
-            Assert.That(actualTemplate.Incoming, Is.EqualTo(expectedTemplate.Incoming));
+            Assert.That(actualTemplate.Request, Is.EqualTo(expectedTemplate.Request));
         }
 
         private static Template CreateTemplate(string incomingPattern)
         {
             Template templateOne = new Template
             {
-                Incoming = incomingPattern
+                Request = incomingPattern
             };
 
             return templateOne;

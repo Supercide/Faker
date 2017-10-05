@@ -5,12 +5,13 @@ using Newtonsoft.Json.Linq;
 namespace FakR.Core {
     public class Template
     {
-        public string Incoming { get; set; }
+        public string Request { get; set; }
         private string Outgoing { get; set; }
+        public string Response { get; set; }
 
         public IList<string> GetProperties()
         {
-            return JObject.Parse(Incoming)
+            return JObject.Parse(Request)
                           .Properties()
                           .Select(property => property.Name)
                           .ToList();
