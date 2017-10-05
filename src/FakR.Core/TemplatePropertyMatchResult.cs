@@ -5,6 +5,6 @@ namespace FakR.Core {
     {
         public IEnumerable<string> TemplateProperties { get; set; }
         public int PropertyMatchCount { get; set; }
-        public string Template { get; set; }
+        public Template Template { get; set; }
     }
 }

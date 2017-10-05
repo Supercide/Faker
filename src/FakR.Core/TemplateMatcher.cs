@@ -14,16 +14,16 @@ namespace FakR.Core
             _templateStore = templateStore;
         }
 
-        public string Match(string request, Uri @namespace)
+        public Template Match(string pattern, Uri @namespace)
         {
             var templates = _templateStore.GetTemplates(@namespace);
 
             return templates.Any()
-                ? GetClosestMatchingTemplate(templates, request)?.Template
-                : string.Empty;
+                ? GetClosestMatchingTemplate(templates, pattern)?.Template
+                : null;
         }
 
-        private static TemplatePropertyMatchResult GetClosestMatchingTemplate(string[] templates, string request)
+        private static TemplatePropertyMatchResult GetClosestMatchingTemplate(Template[] templates, string request)
         {
             IList<TemplatePropertyMatchResult> results = FindTemplatesWithMostMatchingProperties(templates, request);
 
@@ -47,7 +47,7 @@ namespace FakR.Core
                         .Select(property => property.Name);
         }
 
-        private static IList<TemplatePropertyMatchResult> FindTemplatesWithMostMatchingProperties(IEnumerable<string> templates, string request)
+        private static IList<TemplatePropertyMatchResult> FindTemplatesWithMostMatchingProperties(IEnumerable<Template> templates, string request)
         {
             IEnumerable<TemplatePropertyMatchResult> matchingTemplates = FindAllTemplatesWithMatchingProperties(templates, request);
 
@@ -56,18 +56,18 @@ namespace FakR.Core
             return matchingTemplates.Where(template => template.PropertyMatchCount == maxMatches).ToList();
         }
 
-        private static IList<TemplatePropertyMatchResult> FindAllTemplatesWithMatchingProperties(IEnumerable<string> templates, string request)
+        private static IList<TemplatePropertyMatchResult> FindAllTemplatesWithMatchingProperties(IEnumerable<Template> templates, string request)
         {
             return templates.Select(template => CalculatePropertiesMatchingInTemplate(request, template))
                             .Where(result => result.PropertyMatchCount > 0)
                             .ToList();
         }
 
-        private static TemplatePropertyMatchResult CalculatePropertiesMatchingInTemplate(string request, string template)
+        private static TemplatePropertyMatchResult CalculatePropertiesMatchingInTemplate(string request, Template template)
         {
             IEnumerable<string> requestProperties = GetRequestProperties(request);
 
-            IList<string> templateProperties = GetTemplateProperties(template);
+            IList<string> templateProperties = template.GetProperties();
 
             return new TemplatePropertyMatchResult
             {
@@ -80,14 +80,6 @@ namespace FakR.Core
         private static int GetPropertyMatchCount(IEnumerable<string> propertiesLeft, IList<string> propertiesRight)
         {
             return propertiesLeft.Count(propertiesRight.Contains);
-        }
-
-        private static IList<string> GetTemplateProperties(string template)
-        {
-            return JObject.Parse(template)
-                          .Properties()
-                          .Select(property => property.Name)
-                          .ToList();
         }
     }
 }

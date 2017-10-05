@@ -1,6 +1,4 @@
 ﻿using System;
-using System.Security.Cryptography;
-using System.Text;
 using FakR.Core;
 using Moq;
 using NUnit.Framework;
@@ -11,7 +9,7 @@ namespace FakR.Tests
     public class TemplateTests
     {
         [Test]
-        public void GivenKnownTemplate_WhenRetrievingTemplates_ThenCallsTemplateStoreWithNameSpace()
+        public void GivenKnownContent_WhenRetrievingTemplates_ThenCallsTemplateStoreWithNameSpace()
         {
             Uri expectedNamespace = new Uri("http://localhost/anyvalue");
 
@@ -28,19 +26,29 @@ namespace FakR.Tests
         public void GivenMultipleTemplates_WhenRetrievingTemplates_ThenReturnsTemplateWithMostMatchedFields()
         {
             string content = "{ \"a\": \"1\",\"b\": \"2\",\"c\": \"3\" }";
-            string templateOne = "{ \"a\":\"1\" }";
-            string templateTwo = "{ \"a\": \"1\",\"b\": \"2\" }";
-            string expectedTemplate = "{ \"a\": \"1\",\"b\": \"2\",\"c\": \"3\" }";
-            string templateThree = "{ \"a\": \"1\",\"b\": \"2\",\"c\": \"3\", \"d\": \"4\" }";
+            var templateOne = CreateTemplate("{ \"a\":\"1\" }");
+            var templateTwo = CreateTemplate("{ \"a\": \"1\",\"b\": \"2\" }");
+            var templateThree = CreateTemplate("{ \"a\": \"1\",\"b\": \"2\",\"c\": \"3\", \"d\": \"4\" }");
+            var expectedTemplate = CreateTemplate("{ \"a\": \"1\",\"b\": \"2\",\"c\": \"3\" }");
 
             Mock<ITemplateStore> mockTemplateStore = new Mock<ITemplateStore>();
-            mockTemplateStore.Setup(x => x.GetTemplates(It.IsAny<Uri>())).Returns(new string[] {templateOne, templateTwo, templateThree, expectedTemplate });
+            mockTemplateStore.Setup(x => x.GetTemplates(It.IsAny<Uri>())).Returns(new [] {templateOne, templateTwo, templateThree, expectedTemplate });
 
             TemplateMatcher templateMatcher = new TemplateMatcher(mockTemplateStore.Object);
 
-            string actualTemplate = templateMatcher.Match(content, new Uri("http://anything"));
+            var actualTemplate = templateMatcher.Match(content, new Uri("http://anything"));
 
-            Assert.That(actualTemplate, Is.EqualTo(expectedTemplate));
+            Assert.That(actualTemplate.Incoming, Is.EqualTo(expectedTemplate.Incoming));
+        }
+
+        private static Template CreateTemplate(string incomingPattern)
+        {
+            Template templateOne = new Template
+            {
+                Incoming = incomingPattern
+            };
+
+            return templateOne;
         }
     }
 }
