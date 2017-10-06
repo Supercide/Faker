@@ -2,7 +2,7 @@
 using System.Linq;
 using Newtonsoft.Json.Linq;
 
-namespace FakR.Core {
+namespace Faker.Core {
     public class JsonObjectRequest : JsonRequest
     {
         private readonly Dictionary<string, string> _objectDictionary;

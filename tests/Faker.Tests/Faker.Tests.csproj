@@ -10,7 +10,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\..\src\FakR.Core\FakR.Core.csproj" />
+    <ProjectReference Include="..\..\src\Faker.Core\Faker.Core.csproj" />
   </ItemGroup>
 
 </Project>

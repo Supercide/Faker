@@ -2,7 +2,7 @@
 using System.Linq;
 using Newtonsoft.Json.Linq;
 
-namespace FakR.Core {
+namespace Faker.Core {
     public class Template
     {
         public string Request { get; set; }

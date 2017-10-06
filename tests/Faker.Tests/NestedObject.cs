@@ -1,4 +1,4 @@
-﻿namespace FakR.Tests {
+﻿namespace FFakerTests {
     public class NestedObject
     {
         public string String { get; set; }

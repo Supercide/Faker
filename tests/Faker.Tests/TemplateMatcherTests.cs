@@ -1,10 +1,10 @@
 ﻿using System;
-using FakR.Core;
+using Faker.Core;
 using Moq;
 using NUnit.Framework;
 using NUnit.Framework.Constraints;
 
-namespace FakR.Tests
+namespace Faker.Tests
 {
     [TestFixture]
     public class TemplateMatcherTests

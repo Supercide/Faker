@@ -1,6 +1,6 @@
 ﻿using System.Collections.Generic;
 
-namespace FakR.Core {
+namespace Faker.Core {
     public class TemplatePropertyMatchResult
     {
         public IEnumerable<string> TemplateProperties { get; set; }

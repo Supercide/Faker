@@ -1,4 +1,4 @@
-﻿namespace FakR.Core {
+﻿namespace FFakerCore {
     public class MergeField
     {
         public string Token { get; set; }

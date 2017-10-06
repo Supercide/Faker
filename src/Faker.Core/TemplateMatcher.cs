@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using Newtonsoft.Json.Linq;
 
-namespace FakR.Core
+namespace Faker.Core
 {
     public class TemplateMatcher
     {
