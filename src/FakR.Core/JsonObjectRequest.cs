@@ -1,5 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
 using Newtonsoft.Json.Linq;
 
@@ -15,33 +14,46 @@ namespace FakR.Core {
                                        .ToDictionary(property => property.Key, property => property.Value);
         }
 
-        static IEnumerable<KeyValuePair<string, string>> WalkNode(JToken node)
+        private static IEnumerable<KeyValuePair<string, string>> WalkNode(JToken node)
         {
-            List<KeyValuePair<string, string>> paths = new List<KeyValuePair<string, string>>();
+            var paths = WalkObject(node).Union(WalkArray(node))
+                                        .ToArray();
 
-            switch (node.Type)
+            return paths.Any()
+                        ? paths
+                        : ReturnCurrentPath(node);
+        }
+
+        private static KeyValuePair<string, string>[] ReturnCurrentPath(JToken node)
+        {
+            return new[] {new KeyValuePair<string, string>(node.Path, node.Value<string>())};
+        }
+
+        private static IEnumerable<KeyValuePair<string, string>> WalkArray(JToken node)
+        {
+            var paths = Enumerable.Empty<KeyValuePair<string, string>>();
+
+            if (node.Type == JTokenType.Array)
             {
-                case JTokenType.Object:
-                    paths.AddRange(WalkObject(node));
-                    break;
-
-                case JTokenType.Array:
-                    paths.AddRange(WalkArray(node));
-                    break;
-
-                default:
-                    paths.Add(new KeyValuePair<string, string>(node.Path, node.Value<string>()));
-                    break;
+                paths = node.Children()
+                            .SelectMany(WalkNode);
             }
 
             return paths;
         }
 
-        private static IEnumerable<KeyValuePair<string, string>> WalkArray(JToken node) => node.Children()
-                                                                                               .SelectMany(WalkNode);
+        private static IEnumerable<KeyValuePair<string, string>> WalkObject(JToken node)
+        {
+            var paths = Enumerable.Empty<KeyValuePair<string, string>>();
 
-        private static IEnumerable<KeyValuePair<string, string>> WalkObject(JToken node) => node.Children<JProperty>()
-                                                                                                .SelectMany(property => WalkNode(property.Value));
+            if (node.Type == JTokenType.Object)
+            {
+                paths = node.Children<JProperty>()
+                           .SelectMany(property => WalkNode(property.Value));
+            }
+
+            return paths;
+        }
 
         public override string GetPropertyValueBy(string path)
         {
