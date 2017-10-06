@@ -18,28 +18,28 @@ namespace FakR.Core {
             return template.MergeFields(mergeFields);
         }
 
-        private static List<MergeField> GetMergeFields(IRequest request, string mergeTemplate)
+        private static IEnumerable<MergeField> GetMergeFields(IRequest request, string mergeTemplate)
         {
-            List<MergeField> mergeFields = new List<MergeField>();
+            var matches = SearchForTokens(mergeTemplate);
 
-            foreach (Match match in SearchForTokens(mergeTemplate))
-            {
-                mergeFields.Add(new MergeField
-                {
-                    Token = match.Value,
-                    Property = match.Groups[1].Value,
-                    Value = request.GetPropertyValueBy(match.Groups[1].Value)
-                });
-            }
-
-            return mergeFields;
+            return matches.Select(match => CreateMergeField(request, match));
         }
 
-        private static MatchCollection SearchForTokens(string mergeTemplate)
+        private static MergeField CreateMergeField(IRequest request, Match match)
+        {
+            return new MergeField
+            {
+                Token = match.Value,
+                Property = match.Groups[1].Value,
+                Value = request.GetPropertyValueBy(match.Groups[1].Value)
+            };
+        }
+
+        private static IEnumerable<Match> SearchForTokens(string mergeTemplate)
         {
             Regex regex = new Regex(@"\{\{(\S+)\}\}");
 
-           return  regex.Matches(mergeTemplate);
+           return  regex.Matches(mergeTemplate).Cast<Match>();
         }
     }
 }
