@@ -91,6 +91,7 @@ namespace Faker.Tests {
             Assert.That(response, Is.EqualTo(expected));
         }
 
+
         [Test]
         public void GivenDynamicTemplate_WhenCreatingResponseFromArray_ThenCreatesResponse()
         {
