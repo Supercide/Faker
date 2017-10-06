@@ -10,15 +10,9 @@ namespace FakR.Core {
 
         public JsonObjectRequest(JObject jObject)
         {
-            List<KeyValuePair<string, string>> properties = new List<KeyValuePair<string, string>>();
-
-            foreach (var property in jObject)
-            {
-                properties.AddRange(WalkNode(property.Value));
-            }
-
-            _objectDictionary = properties.ToDictionary(x => x.Key, x => x.Value);
-
+            _objectDictionary = jObject.Cast<KeyValuePair<string, JToken>>()
+                                       .SelectMany(property => WalkNode(property.Value))
+                                       .ToDictionary(property => property.Key, property => property.Value);
         }
 
         static IEnumerable<KeyValuePair<string, string>> WalkNode(JToken node)
