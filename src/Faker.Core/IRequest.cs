@@ -1,4 +1,4 @@
-﻿namespace FFakerCore {
+﻿namespace Faker.Core {
 
     public interface IRequest
     {

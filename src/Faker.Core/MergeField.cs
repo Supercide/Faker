@@ -1,4 +1,4 @@
-﻿namespace FFakerCore {
+﻿namespace Faker.Core {
     public class MergeField
     {
         public string Token { get; set; }

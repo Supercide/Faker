@@ -1,4 +1,5 @@
-﻿using FFakerCore;
+﻿using Faker.Core;
+using FFakerTests;
 using Newtonsoft.Json;
 using NUnit.Framework;
 
