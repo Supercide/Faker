@@ -1,5 +1,4 @@
-﻿using System;
-using FakR.Core;
+﻿using FakR.Core;
 using Newtonsoft.Json;
 using NUnit.Framework;
 
