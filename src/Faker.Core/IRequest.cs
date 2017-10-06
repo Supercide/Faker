@@ -1,4 +1,4 @@
-﻿namespace FakR.Core {
+﻿namespace FFakerCore {
 
     public interface IRequest
     {

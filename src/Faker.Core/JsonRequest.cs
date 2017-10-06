@@ -1,7 +1,7 @@
 ﻿using System;
 using Newtonsoft.Json.Linq;
 
-namespace FakR.Core {
+namespace Faker.Core {
     public abstract class JsonRequest : IRequest
     {
         public static JsonRequest Create(string json)

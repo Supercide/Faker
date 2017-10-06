@@ -1,8 +1,8 @@
-﻿using FakR.Core;
+﻿using FFakerCore;
 using Newtonsoft.Json;
 using NUnit.Framework;
 
-namespace FakR.Tests {
+namespace Faker.Tests {
     public class ResponseCreationTests
     {
         [Test]

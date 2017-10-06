@@ -3,7 +3,7 @@ using System.Linq;
 using System.Text.RegularExpressions;
 using Newtonsoft.Json.Linq;
 
-namespace FakR.Core {
+namespace Faker.Core {
     public class ResponseFactory
     {
         public string Create(IRequest request, Template template)

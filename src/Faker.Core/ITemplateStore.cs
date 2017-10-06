@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace FakR.Core {
+namespace Faker.Core {
     public interface ITemplateStore
     {
         Template[] GetTemplates(Uri @namespace);
