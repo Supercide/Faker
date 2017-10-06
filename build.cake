@@ -11,7 +11,7 @@ string version = string.Join(".", semVersion.Split(new string []{".","-"}, Strin
 
 const string BUILD_CONFIG = "Release";
 const string SOLUTION_PATH = "./Faker.sln";
-const string FRAMEWORK = "net461";
+const string FRAMEWORK = "netcoreapp2.0";
 
 ///////////////////////////////////////////////////////////////////////////////
 // PREPARE
@@ -19,8 +19,8 @@ const string FRAMEWORK = "net461";
 
 Task("Clean")
     .Does(() => {
-       // CleanDirectories("./src/**/bin");
-       // CleanDirectories("./tests/**/bin");
+        CleanDirectories("./src/**/bin");
+        CleanDirectories("./tests/**/bin");
     });
 
 Task("NugetRestore")
@@ -58,9 +58,7 @@ Task("Test")
     {
 		var testAssemblies = GetFiles(string.Format("./tests/**/bin/{0}/{1}/*Tests.dll", BUILD_CONFIG, FRAMEWORK));
 
-        NUnit3(testAssemblies, new NUnit3Settings {
-            NoResults = false
-        });
+        DotNetCoreTest(testAssemblies);
     });
 
 ///////////////////////////////////////////////////////////////////////////////
