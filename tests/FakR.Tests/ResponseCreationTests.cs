@@ -61,24 +61,24 @@ namespace FakR.Tests {
         public void GivenDynamicTemplate_WhenCreatingResponseFromNestedObject_ThenCreatesResponse()
         {
             var request = JsonConvert.SerializeObject(NestedObject.Create());
-            var expected = "{ \"Message\": \"Captured : Elite, 1337, true, Dam!, 1881, false\" }";
+            var expected = "{ \"Message\": \"Captured : Elite, 1337, True, 2, Dam!, 1881, False, 5\" }";
             Template template = new Template
             {
-                Response = "{ \"Message\": \"Captured : {{String}}, {{Number}}, {{Bool}}, {{Nested.String}}, {{Nested.Number}}, {{Nested.Bool}}\" }"
+                Response = "{ \"Message\": \"Captured : {{String}}, {{Number}}, {{Bool}}, {{Array[1]}}, {{Nested.String}}, {{Nested.Number}}, {{Nested.Bool}}, {{Nested.Array[1]}}\" }"
             };
 
             ResponseFactory factory = new ResponseFactory();
 
             var response = factory.Create(JsonRequest.Create(request), template);
 
-            Assert.That(string.Equals(response, expected, StringComparison.OrdinalIgnoreCase), Is.True);
+            Assert.That(response, Is.EqualTo(expected));
         }
 
         [Test]
         public void GivenDynamicTemplate_WhenCreatingResponseFromNestedObjectUsingIndexes_ThenCreatesResponse()
         {
             var request = JsonConvert.SerializeObject(NestedObject.Create());
-            var expected = "{ \"Message\": \"Captured : Elite, 1337, true, Dam!, 1881, false\" }";
+            var expected = "{ \"Message\": \"Captured : Elite, 1, 2, 3, 1337, True\" }";
             Template template = new Template
             {
                 Response = "{ \"Message\": \"Captured : {{0}}, {{1}}, {{2}}, {{3}}, {{4}}, {{5}}\" }"
@@ -88,7 +88,7 @@ namespace FakR.Tests {
 
             var response = factory.Create(JsonRequest.Create(request), template);
 
-            Assert.That(string.Equals(response, expected, StringComparison.OrdinalIgnoreCase), Is.True);
+            Assert.That(response, Is.EqualTo(expected));
         }
 
         [Test]
