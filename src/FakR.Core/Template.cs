@@ -17,5 +17,16 @@ namespace FakR.Core {
                           .ToList();
         }
 
+        public string MergeFields(IEnumerable<MergeField> mergeFields)
+        {
+            string template = Response;
+
+            foreach (MergeField mergeToken in mergeFields)
+            {
+                template = template.Replace(mergeToken.Token, mergeToken.Value);
+            }
+
+            return template;
+        }
     }
 }

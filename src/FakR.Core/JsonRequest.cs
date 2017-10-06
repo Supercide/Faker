@@ -19,7 +19,7 @@ namespace FakR.Core {
             }
         }
 
-        public abstract string GetPropertyBy(string path);
-        public abstract string GetPropertyBy(int index);
+        public abstract string GetPropertyValueBy(string path);
+        public abstract string GetPropertyValueBy(int index);
     }
 }

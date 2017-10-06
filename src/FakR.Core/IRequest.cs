@@ -2,8 +2,8 @@
 
     public interface IRequest
     {
-        string GetPropertyBy(string path);
+        string GetPropertyValueBy(string path);
 
-        string GetPropertyBy(int index);
+        string GetPropertyValueBy(int index);
     }
 }

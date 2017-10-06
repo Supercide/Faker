@@ -10,12 +10,12 @@ namespace FakR.Core {
             _jArray = jArray;
         }
 
-        public override string GetPropertyBy(string path)
+        public override string GetPropertyValueBy(string path)
         {
-            return GetPropertyBy(int.Parse(path));
+            return GetPropertyValueBy(int.Parse(path));
         }
 
-        public override string GetPropertyBy(int index)
+        public override string GetPropertyValueBy(int index)
         {
             string value = null;
 

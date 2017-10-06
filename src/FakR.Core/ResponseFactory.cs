@@ -8,33 +8,27 @@ namespace FakR.Core {
     {
         public string Create(IRequest request, Template template)
         {
-            return MergeWithTemplate(request, template.Response);
+            return MergeWithTemplate(request, template);
         }
 
-        private static string MergeWithTemplate(IRequest request, string responseTemplate)
+        private static string MergeWithTemplate(IRequest request, Template template)
         {
-            var mergeTokens = GetMergeTokens(responseTemplate);
+            var mergeFields = GetMergeFields(request, template.Response);
 
-            foreach (MergeToken mergeToken in mergeTokens)
-            {
-                var propertyValue = request.GetPropertyBy(mergeToken.Property);
-
-                responseTemplate = responseTemplate.Replace(mergeToken.Token, propertyValue);
-            }
-
-            return responseTemplate;
+            return template.MergeFields(mergeFields);
         }
 
-        private static List<MergeToken> GetMergeTokens(string mergeTemplate)
+        private static List<MergeField> GetMergeFields(IRequest request, string mergeTemplate)
         {
-            List<MergeToken> mergeFields = new List<MergeToken>();
+            List<MergeField> mergeFields = new List<MergeField>();
 
             foreach (Match match in SearchForTokens(mergeTemplate))
             {
-                mergeFields.Add(new MergeToken
+                mergeFields.Add(new MergeField
                 {
                     Token = match.Value,
-                    Property = match.Groups[1].Value
+                    Property = match.Groups[1].Value,
+                    Value = request.GetPropertyValueBy(match.Groups[1].Value)
                 });
             }
 
@@ -47,12 +41,5 @@ namespace FakR.Core {
 
            return  regex.Matches(mergeTemplate);
         }
-    }
-
-    public class MergeToken
-    {
-        public string Token { get; set; }
-
-        public string Property { get; set; }
     }
 }
