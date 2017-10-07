@@ -31,7 +31,7 @@ namespace Faker.Tests {
             var expected = "{ \"Message\": \"Captured : 1, 2, 3\" }";
             Template template = new Template
             {
-                Response = "{ \"Message\": \"Captured : {{a}}, {{b}}, {{c}}\" }"
+                Response = "{ \"Message\": \"Captured : {{a}}, {{b}}, {{d}}\" }"
             };
 
             ResponseFactory factory = new ResponseFactory();
