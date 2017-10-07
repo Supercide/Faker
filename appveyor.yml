@@ -1,10 +1,14 @@
 version: 0.0.1
+
 os: Visual Studio 2017
 
 test: off
 
 artifacts:
 - path: '.\artifacts\packages\*.nupkg'
+
+build_script:
+  - ps: .\build.ps1 -ScriptArgs '-task="Server" -isLocal="false" -nugetApiKey="$($env:Nuget_ApiKey)" -buildVersion="$($env:version)"'
 
 on_failure:
   - ps: Update-AppveyorBuild -Version "$($env:APPVEYOR_BUILD_VERSION)-$(Get-Date -format HHmmss)-failed"
@@ -17,13 +21,13 @@ for:
       only:
         - master
 
-    build_script:
-      - ps: .\build.ps1 -ScriptArgs '-task="Server" -isLocal="false" -nugetApiKey="$($env:Nuget_ApiKey)" -buildVersion="$($env:APPVEYOR_BUILD_VERSION)"'
-
+    install:
+      - ps: $env:version="$($env:APPVEYOR_BUILD_VERSION)"
   -
     branches:
       except:
         - master
-  
-    build_script:
-      - ps: .\build.ps1 -ScriptArgs '-task="Server" -isLocal="false" -nugetApiKey="$($env:Nuget_ApiKey)" -buildVersion="$($env:APPVEYOR_BUILD_VERSION)-$($env:APPVEYOR_BUILD_NUMBER).$($env:APPVEYOR_REPO_BRANCH)"'
+
+    install:
+      - ps: $env:version="$($env:APPVEYOR_BUILD_VERSION)-$($env:APPVEYOR_BUILD_NUMBER).$($env:APPVEYOR_REPO_BRANCH)"
+      - ps: Update-AppveyorBuild -Version "$($env:version)"
