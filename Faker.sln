@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 15
-VisualStudioVersion = 15.0.26730.15
+VisualStudioVersion = 15.0.26730.16
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "src", "src", "{1FF55DB2-644E-4870-9B96-B3DC0DE5E21E}"
 EndProject
@@ -13,8 +13,10 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Faker.Core", "src\Faker.Cor
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{2FCE82E0-8721-429D-944D-34BEEDB91CC7}"
 	ProjectSection(SolutionItems) = preProject
+		appveyor.yml = appveyor.yml
 		build.cake = build.cake
 		build.ps1 = build.ps1
+		ReleaseNotes.md = ReleaseNotes.md
 	EndProjectSection
 EndProject
 Global

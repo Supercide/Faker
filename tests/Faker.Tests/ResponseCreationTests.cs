@@ -1,4 +1,5 @@
-﻿using Faker.Core;
+﻿using System;
+using Faker.Core;
 using FFakerTests;
 using Newtonsoft.Json;
 using NUnit.Framework;
@@ -15,7 +16,7 @@ namespace Faker.Tests {
             {
                 Response = "{ \"a\": \"1\",\"b\": \"2\",\"c\": \"3\" }"
             };
-
+            
             ResponseFactory factory = new ResponseFactory();
 
             var response = factory.Create(JsonRequest.Create(request), template);
@@ -66,7 +67,7 @@ namespace Faker.Tests {
             {
                 Response = "{ \"Message\": \"Captured : {{String}}, {{Number}}, {{Bool}}, {{Array[1]}}, {{Nested.String}}, {{Nested.Number}}, {{Nested.Bool}}, {{Nested.Array[1]}}\" }"
             };
-
+            
             ResponseFactory factory = new ResponseFactory();
 
             var response = factory.Create(JsonRequest.Create(request), template);

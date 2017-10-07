@@ -1,72 +1,151 @@
 #tool "nuget:?package=NUnit.ConsoleRunner"
-
-var target = Argument("target", "Default");
+///////////////////////////////////////////////////////////////////////////////
+// ARGUMENTS
+///////////////////////////////////////////////////////////////////////////////
+var task            = Argument<string>("task", "Default");
+var configuration   = Argument<string>("configuration", "Release");
+var nugetApiKey     = Argument<string>("nugetApiKey", null);
+var localFeed       = Argument<string>("localfeed", null);
+var isLocal         = Argument<bool>("isLocal", true);
+var buildNumber     = Argument<string>("buildNumber", "");
+//////////////////////////////////////////////////////////////////////
+// GLOBAL VARIABLES
+//////////////////////////////////////////////////////////////////////
+var artifacts       = "./artifacts/";
+var releaseNotes    = ParseReleaseNotes("./ReleaseNotes.md");
+var solution        = GetFiles("./**/*.sln").First().FullPath;
+var version         = releaseNotes.Version.ToString();
+var semVersion      = isLocal
+                          ? string.Concat(version, "-local", DateTime.Now.ToString("yyMMddHHmmss"))
+                          : string.Concat(version, buildNumber);
 
 //////////////////////////////////////////////////////////////////////
-// VARIABLES
+// ENVIRONMENTAL VARIABLES
 //////////////////////////////////////////////////////////////////////
-
-string semVersion = EnvironmentVariable("BUILD_VERSION") ?? "1.0.0-DEV";
-string version = string.Join(".", semVersion.Split(new string []{".","-"}, StringSplitOptions.RemoveEmptyEntries).Take(3));
-
-const string BUILD_CONFIG = "Release";
-const string SOLUTION_PATH = "./Faker.sln";
-const string FRAMEWORK = "netcoreapp2.0";
+Environment.SetEnvironmentVariable("Version", version);
 
 ///////////////////////////////////////////////////////////////////////////////
-// PREPARE
+// Clean Environment
 ///////////////////////////////////////////////////////////////////////////////
-
 Task("Clean")
     .Does(() => {
-        CleanDirectories("./src/**/bin");
-        CleanDirectories("./tests/**/bin");
+        CleanDirectories("./**/bin");
+        CleanDirectories("./**/obj");
+        CleanDirectories("./**/artifacts");
+        CleanDirectories("./**/TestResults");
     });
 
-Task("NugetRestore")
+Task("Restore")
     .IsDependentOn("Clean")
     .Does(() => 
     {
-        NuGetRestore(SOLUTION_PATH);
+        NuGetRestore(solution);
     });
 
 ///////////////////////////////////////////////////////////////////////////////
-// BUILD & PATCH
+// Build Projects
 ///////////////////////////////////////////////////////////////////////////////
 
 Task("Build")
-    .IsDependentOn("NugetRestore")
+    .IsDependentOn("Restore")
     .Does(() =>
     {
         var buildSettings = new DotNetCoreBuildSettings
         {
-            Framework = FRAMEWORK,
-            Configuration = BUILD_CONFIG,
+            Configuration = configuration,
             ArgumentCustomization = args => args.Append("/p:SemVer=" + semVersion)
         };
 
-        DotNetCoreBuild(SOLUTION_PATH, buildSettings);
+        DotNetCoreBuild(solution, buildSettings);
     });
 
 ///////////////////////////////////////////////////////////////////////////////
-// TESTS
+// Run Tests
 ///////////////////////////////////////////////////////////////////////////////
 
 Task("Test")
     .IsDependentOn("Build")
     .Does(() =>
     {
-		var testAssemblies = GetFiles(string.Format("./tests/**/bin/{0}/{1}/*Tests.dll", BUILD_CONFIG, FRAMEWORK));
+        var settings = new DotNetCoreTestSettings
+        {
+           NoBuild = true,
+           Configuration = configuration,
+           ArgumentCustomization = args => args.Append("--logger \"trx\""),
+        };
 
-        DotNetCoreTest(testAssemblies);
+        var testProjects = GetFiles("./tests/**/*.csproj");
+
+        foreach(var project in testProjects)
+        {
+            DotNetCoreTest(project.FullPath, settings);
+        }
     });
 
 ///////////////////////////////////////////////////////////////////////////////
-// TAG
+// Create Nuget Packages
 ///////////////////////////////////////////////////////////////////////////////
+Task("Pack")
+    .IsDependentOn("Test")
+    .Does(() =>
+    {
+        DotNetCoreMSBuildSettings buildSettings = new DotNetCoreMSBuildSettings();
+        buildSettings.SetVersionPrefix(semVersion);
 
+        var settings = new DotNetCorePackSettings
+        {
+            NoBuild = true,
+            MSBuildSettings = buildSettings,
+            Configuration = configuration,
+            OutputDirectory = artifacts
+        };
+
+        var projects = GetFiles("./src/**/*.csproj");
+
+        foreach(var project in projects)
+        {
+            DotNetCorePack(project.FullPath, settings);
+        }
+    });
+
+Task("Publish-Local")
+    .IsDependentOn("pack")
+    .WithCriteria(() => isLocal)
+    .WithCriteria(() => !string.IsNullOrWhiteSpace(localFeed))
+    .Does(() => {
+        var packageFiles = GetFiles(artifacts + "*.nupkg");
+        
+        var processSettings = new ProcessSettings{ Arguments = string.Format("init {0} {1}", artifacts, localFeed) };
+        
+        var exitCodeWithArgument = StartProcess("nuget", processSettings);
+        
+        Information("Exit code: {0}", exitCodeWithArgument);
+    });
+
+Task("Publish")
+    .IsDependentOn("pack")
+    .WithCriteria(() => !isLocal)
+    .Does(() => {
+        var packageFiles = GetFiles(artifacts + "*.nupkg");
+        foreach(var package in packageFiles)
+        {
+            var nugetSettings = new NuGetPushSettings 
+            {
+                Source = "https://www.nuget.org/api/v2/package",
+                ApiKey = nugetApiKey 
+            };
+
+            NuGetPush(package, nugetSettings);
+        }
+    });
 
 Task("Default")
-    .IsDependentOn("Test");
+    .IsDependentOn("Publish-local");
 
-RunTarget(target);
+Task("Local")
+    .IsDependentOn("Publish-local");
+
+Task("Server")
+    .IsDependentOn("Publish");
+
+RunTarget(task);
