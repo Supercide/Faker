@@ -1,3 +1,4 @@
+version: 0.0.1
 os: Visual Studio 2017
 
 test: off
@@ -6,13 +7,9 @@ artifacts:
 - path: '.\artifacts\packages\*.nupkg'
 
 on_failure:
-  - ps: Update-AppveyorBuild -Version "$($env:semVersion)-$(Get-Date -format HHmmss)-failed"
+  - ps: Update-AppveyorBuild -Version "$($env:APPVEYOR_BUILD_VERSION)-$(Get-Date -format HHmmss)-failed"
   - ps: $wc = New-Object 'System.Net.WebClient'
   - ps: Resolve-Path .\artifacts\test-results\*.trx | ForEach-Object { $wc.UploadFile("https://ci.appveyor.com/api/testresults/mstest/$($env:APPVEYOR_JOB_ID)", $_) }
-
-after_build:
-  - ps: echo "current version is $($env:semVersion)"
-  - ps: Update-AppveyorBuild -Version "$($env:semVersion)"
 
 for:
   -
@@ -21,7 +18,7 @@ for:
         - master
 
     build_script:
-      - ps: .\build.ps1 -ScriptArgs '-task="Server" -nugetApiKey="$($env:Nuget_ApiKey)" -isLocal=false'
+      - ps: .\build.ps1 -ScriptArgs '-task="Server" -nugetApiKey="$($env:Nuget_ApiKey)" -version="$($env:APPVEYOR_BUILD_VERSION)" -isLocal=false'
 
   -
     branches:
@@ -29,4 +26,4 @@ for:
         - master
   
     build_script:
-      - ps: .\build.ps1 -ScriptArgs '-task="Server" -nugetApiKey="$($env:Nuget_ApiKey)" -buildNumber="-$($env:APPVEYOR_REPO_BRANCH)$($env:APPVEYOR_BUILD_NUMBER)" -isLocal=false'
+      - ps: .\build.ps1 -ScriptArgs '-task="Server" -nugetApiKey="$($env:Nuget_ApiKey)" -version="$($env:APPVEYOR_BUILD_VERSION)-$($env:APPVEYOR_BUILD_NUMBER).$($env:APPVEYOR_REPO_BRANCH)" -isLocal=false'

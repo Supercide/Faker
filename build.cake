@@ -8,6 +8,8 @@ var nugetApiKey     = Argument<string>("nugetApiKey", null);
 var localFeed       = Argument<string>("localfeed", null);
 var isLocal         = Argument<bool>("isLocal", true);
 var buildNumber     = Argument<string>("buildNumber", "");
+var version         = Argument<string>("version", "0.0.1");
+
 //////////////////////////////////////////////////////////////////////
 // GLOBAL VARIABLES
 //////////////////////////////////////////////////////////////////////
@@ -16,15 +18,6 @@ var testResults     = string.Concat(artifacts, "test-results/");
 var packages        = string.Concat(artifacts, "packages/");
 var releaseNotes    = ParseReleaseNotes("./ReleaseNotes.md");
 var solution        = GetFiles("./**/*.sln").First().FullPath;
-var version         = releaseNotes.Version.ToString();
-var semVersion      = isLocal
-                          ? string.Concat(version, "-local", DateTime.Now.ToString("yyMMddHHmmss"))
-                          : string.Concat(version, buildNumber);
-
-//////////////////////////////////////////////////////////////////////
-// ENVIRONMENTAL VARIABLES
-//////////////////////////////////////////////////////////////////////
-Environment.SetEnvironmentVariable("semVersion", semVersion);
 
 ///////////////////////////////////////////////////////////////////////////////
 // Clean Environment
@@ -54,7 +47,7 @@ Task("Build")
         var buildSettings = new DotNetCoreBuildSettings
         {
             Configuration = configuration,
-            ArgumentCustomization = args => args.Append("/p:SemVer=" + semVersion)
+            ArgumentCustomization = args => args.Append("/p:SemVer=" + version)
         };
 
         DotNetCoreBuild(solution, buildSettings);
@@ -95,7 +88,7 @@ Task("Pack")
     .Does(() =>
     {
         DotNetCoreMSBuildSettings buildSettings = new DotNetCoreMSBuildSettings();
-        buildSettings.SetVersionPrefix(semVersion);
+        buildSettings.SetVersionPrefix(version);
 
         var settings = new DotNetCorePackSettings
         {
