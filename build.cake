@@ -12,6 +12,8 @@ var buildNumber     = Argument<string>("buildNumber", "");
 // GLOBAL VARIABLES
 //////////////////////////////////////////////////////////////////////
 var artifacts       = "./artifacts/";
+var testResults     = string.Concat(artifacts, "test-results/");
+var packages        = string.Concat(artifacts, "packages/");
 var releaseNotes    = ParseReleaseNotes("./ReleaseNotes.md");
 var solution        = GetFiles("./**/*.sln").First().FullPath;
 var version         = releaseNotes.Version.ToString();
@@ -32,7 +34,6 @@ Task("Clean")
         CleanDirectories("./**/bin");
         CleanDirectories("./**/obj");
         CleanDirectories("./**/artifacts");
-        CleanDirectories("./**/TestResults");
     });
 
 Task("Restore")
@@ -71,7 +72,11 @@ Task("Test")
         {
            NoBuild = true,
            Configuration = configuration,
-           ArgumentCustomization = args => args.Append("--logger \"trx\""),
+           ArgumentCustomization = args => {
+                args.Append("--logger:trx");
+                args.Append("--results-directory:"+MakeAbsolute(File(testResults)));
+                return args;
+           }
         };
 
         var testProjects = GetFiles("./tests/**/*.csproj");
@@ -126,7 +131,7 @@ Task("Publish")
     .IsDependentOn("pack")
     .WithCriteria(() => !isLocal)
     .Does(() => {
-        var packageFiles = GetFiles(artifacts + "*.nupkg");
+        var packageFiles = GetFiles(packages + "*.nupkg");
         foreach(var package in packageFiles)
         {
             var nugetSettings = new NuGetPushSettings 

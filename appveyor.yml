@@ -14,7 +14,7 @@ after_build:
           }
 
 artifacts:
-- path: '.\artifacts\*.nupkg'
+- path: '.\artifacts\packages\*.nupkg'
 
 for:
   -
