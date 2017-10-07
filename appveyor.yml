@@ -5,13 +5,7 @@ test: off
 after_build:
   - ps: Update-AppveyorBuild -Version "$($env:semVersion)"
   - ps: $wc = New-Object 'System.Net.WebClient'
-  - ps: $files = Resolve-Path .\artifacts\test-results\*.trx;
-  - ps: >- 
-          foreach($file in $files) 
-          { 
-            echo "Uploading $file to appveyor"
-            $wc.UploadFile("https://ci.appveyor.com/api/testresults/mstest/$($env:APPVEYOR_JOB_ID)", $file) 
-          }
+  - ps: Resolve-Path .\artifacts\test-results\*.trx | ForEach-Object { $wc.UploadFile("https://ci.appveyor.com/api/testresults/mstest/$($env:APPVEYOR_JOB_ID)", $_) }
 
 artifacts:
 - path: '.\artifacts\packages\*.nupkg'
