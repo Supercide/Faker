@@ -5,7 +5,7 @@ test: off
 after_build:
   - ps: Update-AppveyorBuild -Version "$($env:Version)"
   - ps: $wc = New-Object 'System.Net.WebClient'
-  - ps: $files = Resolve-Path .\tests\**\TestResults\*.trx;
+  - ps: $files = Resolve-Path .\artifacts\test-results\*.trx;
   - ps: >- 
           foreach($file in $files) 
           { 
