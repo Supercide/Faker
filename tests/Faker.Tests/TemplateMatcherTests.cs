@@ -2,7 +2,6 @@
 using Faker.Core;
 using Moq;
 using NUnit.Framework;
-using NUnit.Framework.Constraints;
 
 namespace Faker.Tests
 {

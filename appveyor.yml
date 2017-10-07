@@ -3,6 +3,7 @@ os: Visual Studio 2017
 test: off
 
 after_build:
+  - ps: echo "current version is $($env:semVersion)"
   - ps: Update-AppveyorBuild -Version "$($env:semVersion)"
   - ps: $wc = New-Object 'System.Net.WebClient'
   - ps: Resolve-Path .\artifacts\test-results\*.trx | ForEach-Object { $wc.UploadFile("https://ci.appveyor.com/api/testresults/mstest/$($env:APPVEYOR_JOB_ID)", $_) }
