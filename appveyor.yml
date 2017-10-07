@@ -18,7 +18,7 @@ for:
         - master
 
     build_script:
-      - ps: .\build.ps1 -ScriptArgs '-task="Server" -isLocal="false" -nugetApiKey="$($env:Nuget_ApiKey)" -version="$($env:APPVEYOR_BUILD_VERSION)"'
+      - ps: .\build.ps1 -ScriptArgs '-task="Server" -isLocal="false" -nugetApiKey="$($env:Nuget_ApiKey)" -buildVersion="$($env:APPVEYOR_BUILD_VERSION)"'
 
   -
     branches:
@@ -26,4 +26,4 @@ for:
         - master
   
     build_script:
-      - ps: .\build.ps1 -ScriptArgs '-task="Server" -isLocal="false" -nugetApiKey="$($env:Nuget_ApiKey)" -version="$($env:APPVEYOR_BUILD_VERSION)-$($env:APPVEYOR_BUILD_NUMBER).$($env:APPVEYOR_REPO_BRANCH)"'
+      - ps: .\build.ps1 -ScriptArgs '-task="Server" -isLocal="false" -nugetApiKey="$($env:Nuget_ApiKey)" -buildVersion="$($env:APPVEYOR_BUILD_VERSION)-$($env:APPVEYOR_BUILD_NUMBER).$($env:APPVEYOR_REPO_BRANCH)"'

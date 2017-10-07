@@ -7,8 +7,7 @@ var configuration   = Argument<string>("configuration", "Release");
 var nugetApiKey     = Argument<string>("nugetApiKey", null);
 var localFeed       = Argument<string>("localfeed", null);
 var isLocal         = Argument<bool>("isLocal", true);
-var buildNumber     = Argument<string>("buildNumber", "");
-var version         = Argument<string>("version", "0.0.1");
+var version         = Argument<string>("buildVersion", "0.0.1");
 
 //////////////////////////////////////////////////////////////////////
 // GLOBAL VARIABLES
