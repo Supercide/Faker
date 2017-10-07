@@ -102,7 +102,7 @@ Task("Pack")
             NoBuild = true,
             MSBuildSettings = buildSettings,
             Configuration = configuration,
-            OutputDirectory = artifacts
+            OutputDirectory = packages
         };
 
         var projects = GetFiles("./src/**/*.csproj");
@@ -118,9 +118,9 @@ Task("Publish-Local")
     .WithCriteria(() => isLocal)
     .WithCriteria(() => !string.IsNullOrWhiteSpace(localFeed))
     .Does(() => {
-        var packageFiles = GetFiles(artifacts + "*.nupkg");
+        var packageFiles = GetFiles(packages + "*.nupkg");
         
-        var processSettings = new ProcessSettings{ Arguments = string.Format("init {0} {1}", artifacts, localFeed) };
+        var processSettings = new ProcessSettings{ Arguments = string.Format("init {0} {1}", packages, localFeed) };
         
         var exitCodeWithArgument = StartProcess("nuget", processSettings);
         
