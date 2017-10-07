@@ -15,7 +15,6 @@ var version         = Argument<string>("buildVersion", "0.0.1");
 var artifacts       = "./artifacts/";
 var testResults     = string.Concat(artifacts, "test-results/");
 var packages        = string.Concat(artifacts, "packages/");
-var releaseNotes    = ParseReleaseNotes("./ReleaseNotes.md");
 var solution        = GetFiles("./**/*.sln").First().FullPath;
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -122,6 +121,7 @@ Task("Publish-Local")
 Task("Publish")
     .IsDependentOn("pack")
     .WithCriteria(() => !isLocal)
+    .WithCriteria(() => !string.IsNullOrWhiteSpace(nugetApiKey))
     .Does(() => {
         var packageFiles = GetFiles(packages + "*.nupkg");
         foreach(var package in packageFiles)
