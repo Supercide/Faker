@@ -7,7 +7,7 @@ namespace Faker.Core {
         public static JsonRequest Create(string json)
         {
             var container = JToken.Parse(json);
-
+            
             switch (container.Type)
             {
                 case JTokenType.Array:

@@ -5,3 +5,8 @@
 /.vs/
 /**/obj/
 /**/bin/
+/tools
+/TestResult.xml
+/artifacts
+/tests/Faker.Tests/TestResults
+/TestResults
