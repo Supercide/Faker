@@ -10,8 +10,11 @@ artifacts:
 build_script:
   - ps: .\build.ps1 -ScriptArgs '-task="Server" -isLocal="false" -nugetApiKey="$($env:Nuget_ApiKey)" -buildVersion="$($env:version)"'
 
+on_failure:
+  - ps: $env:version="$($env:version)-failed"
+
 on_finish:
-  - ps: Update-AppveyorBuild -Version "$($env:APPVEYOR_BUILD_VERSION)-$(Get-Date -format HHmmss)-failed"
+  - ps: Update-AppveyorBuild -Version "$($env:version)"
   - ps: $wc = New-Object 'System.Net.WebClient'
   - ps: Resolve-Path .\artifacts\test-results\*.trx | ForEach-Object { $wc.UploadFile("https://ci.appveyor.com/api/testresults/mstest/$($env:APPVEYOR_JOB_ID)", $_) }
 
