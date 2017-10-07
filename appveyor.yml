@@ -6,10 +6,15 @@ after_build:
   - ps: Update-AppveyorBuild -Version "$($env:Version)"
   - ps: $wc = New-Object 'System.Net.WebClient'
   - ps: $files = Resolve-Path .\tests\**\TestResults\*.trx;
-  - ps: foreach($file in $files) { $wc.UploadFile("https://ci.appveyor.com/api/testresults/nunit3/$($env:APPVEYOR_JOB_ID)", $file) }
+  - ps: >- 
+          foreach($file in $files) 
+          { 
+            echo "Uploading $file to appveyor"
+            $wc.UploadFile("https://ci.appveyor.com/api/testresults/nunit3/$($env:APPVEYOR_JOB_ID)", $file) 
+          }
 
 artifacts:
-- path: '.\nuget\*.nupkg'
+- path: '.\artifacts\*.nupkg'
 
 for:
   -
