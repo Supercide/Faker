@@ -2,14 +2,17 @@ os: Visual Studio 2017
 
 test: off
 
-after_build:
-  - ps: echo "current version is $($env:semVersion)"
-  - ps: Update-AppveyorBuild -Version "$($env:semVersion)"
+artifacts:
+- path: '.\artifacts\packages\*.nupkg'
+
+on_failure:
+  - ps: Update-AppveyorBuild -Version "$($env:semVersion)-$(Get-Date -format HHmmss)-failed"
   - ps: $wc = New-Object 'System.Net.WebClient'
   - ps: Resolve-Path .\artifacts\test-results\*.trx | ForEach-Object { $wc.UploadFile("https://ci.appveyor.com/api/testresults/mstest/$($env:APPVEYOR_JOB_ID)", $_) }
 
-artifacts:
-- path: '.\artifacts\packages\*.nupkg'
+after_build:
+  - ps: echo "current version is $($env:semVersion)"
+  - ps: Update-AppveyorBuild -Version "$($env:semVersion)"
 
 for:
   -
@@ -19,9 +22,7 @@ for:
 
     build_script:
       - ps: .\build.ps1 -ScriptArgs '-task="Server" -nugetApiKey="$($env:Nuget_ApiKey)" -isLocal=false'
-  
-    on_failure:
-      - ps: Update-AppveyorBuild -Version "$($env:semVersion)-$(Get-Date -format HHmmss)-failed"
+
   -
     branches:
       except:
