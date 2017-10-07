@@ -29,5 +29,5 @@ for:
         - master
 
     install:
-      - ps: $env:version="$($env:APPVEYOR_BUILD_VERSION)-$($env:APPVEYOR_BUILD_NUMBER).$($env:APPVEYOR_REPO_BRANCH)"
+      - ps: $env:version="$($env:APPVEYOR_BUILD_VERSION).$($env:APPVEYOR_BUILD_NUMBER)-$($env:APPVEYOR_REPO_BRANCH)"
       - ps: Update-AppveyorBuild -Version "$($env:version)"
