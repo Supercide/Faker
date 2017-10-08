@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using Faker.Core.Extensions;
 using Newtonsoft.Json.Linq;
 
 namespace Faker.Core
@@ -14,7 +15,7 @@ namespace Faker.Core
             _templateStore = templateStore;
         }
 
-        public Template Match(string pattern, Uri @namespace)
+        public ITemplate Match(string pattern, Uri @namespace)
         {
             var templates = _templateStore.GetTemplates(@namespace);
 
@@ -23,7 +24,7 @@ namespace Faker.Core
                 : null;
         }
 
-        private static TemplatePropertyMatchResult GetClosestMatchingTemplate(Template[] templates, string request)
+        private static TemplatePropertyMatchResult GetClosestMatchingTemplate(ITemplate[] templates, string request)
         {
             IList<TemplatePropertyMatchResult> results = FindTemplatesWithMostMatchingProperties(templates, request);
 
@@ -47,7 +48,7 @@ namespace Faker.Core
                         .Select(property => property.Name);
         }
 
-        private static IList<TemplatePropertyMatchResult> FindTemplatesWithMostMatchingProperties(IEnumerable<Template> templates, string request)
+        private static IList<TemplatePropertyMatchResult> FindTemplatesWithMostMatchingProperties(IEnumerable<ITemplate> templates, string request)
         {
             IEnumerable<TemplatePropertyMatchResult> matchingTemplates = FindAllTemplatesWithMatchingProperties(templates, request);
 
@@ -56,14 +57,14 @@ namespace Faker.Core
             return matchingTemplates.Where(template => template.PropertyMatchCount == maxMatches).ToList();
         }
 
-        private static IList<TemplatePropertyMatchResult> FindAllTemplatesWithMatchingProperties(IEnumerable<Template> templates, string request)
+        private static IList<TemplatePropertyMatchResult> FindAllTemplatesWithMatchingProperties(IEnumerable<ITemplate> templates, string request)
         {
             return templates.Select(template => CalculatePropertiesMatchingInTemplate(request, template))
                             .Where(result => result.PropertyMatchCount > 0)
                             .ToList();
         }
 
-        private static TemplatePropertyMatchResult CalculatePropertiesMatchingInTemplate(string request, Template template)
+        private static TemplatePropertyMatchResult CalculatePropertiesMatchingInTemplate(string request, ITemplate template)
         {
             IEnumerable<string> requestProperties = GetRequestProperties(request);
 

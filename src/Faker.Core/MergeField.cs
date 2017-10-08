@@ -1,5 +1,7 @@
-﻿namespace Faker.Core {
-    public class MergeField
+﻿using Faker.Core.Extensions;
+
+namespace Faker.Core {
+    public class MergeField : IMergeField
     {
         public string Token { get; set; }
         public string Property { get; set; }

@@ -1,4 +1,5 @@
 ﻿using System;
+using Faker.Core.Extensions;
 using Newtonsoft.Json.Linq;
 
 namespace Faker.Core {

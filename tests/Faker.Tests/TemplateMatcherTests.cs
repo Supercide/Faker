@@ -1,5 +1,6 @@
 ﻿using System;
 using Faker.Core;
+using Faker.Core.Extensions;
 using Moq;
 using NUnit.Framework;
 
