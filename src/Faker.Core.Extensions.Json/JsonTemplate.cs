@@ -1,10 +1,9 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
-using Faker.Core.Extensions;
 using Newtonsoft.Json.Linq;
 
-namespace Faker.Core {
-    public class Template : ITemplate
+namespace Faker.Core.Extensions.Json {
+    public class JsonTemplate : ITemplate
     {
         public string Request { get; set; }
         public string Response { get; set; }

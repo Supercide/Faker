@@ -1,8 +1,7 @@
 ﻿using System;
-using Faker.Core.Extensions;
 using Newtonsoft.Json.Linq;
 
-namespace Faker.Core {
+namespace Faker.Core.Extensions.Json {
     public abstract class JsonRequest : IRequest
     {
         public static JsonRequest Create(string json)

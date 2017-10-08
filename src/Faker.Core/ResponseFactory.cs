@@ -7,12 +7,12 @@ using Newtonsoft.Json.Linq;
 namespace Faker.Core {
     public class ResponseFactory
     {
-        public string Create(IRequest request, Template template)
+        public string Create(IRequest request, ITemplate template)
         {
             return MergeWithTemplate(request, template);
         }
 
-        private static string MergeWithTemplate(IRequest request, Template template)
+        private static string MergeWithTemplate(IRequest request, ITemplate template)
         {
             var mergeFields = GetMergeFields(request, template.Response);
 

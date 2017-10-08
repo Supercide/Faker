@@ -1,6 +1,6 @@
 ﻿using Newtonsoft.Json.Linq;
 
-namespace Faker.Core {
+namespace Faker.Core.Extensions.Json {
     public class JsonArrayRequest : JsonRequest
     {
         private readonly JArray _jArray;
