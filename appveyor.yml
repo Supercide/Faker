@@ -16,7 +16,7 @@ on_failure:
 on_finish:
   - ps: Update-AppveyorBuild -Version "$($env:version)"
   - ps: $wc = New-Object 'System.Net.WebClient'
-  - ps: Resolve-Path .\artifacts\test-results\*.trx | ForEach-Object { $wc.UploadFile("https://ci.appveyor.com/api/testresults/mstest/$($env:APPVEYOR_JOB_ID)", $_) }
+  - ps: Resolve-Path .\artifacts\**\*.trx | ForEach-Object { $wc.UploadFile("https://ci.appveyor.com/api/testresults/mstest/$($env:APPVEYOR_JOB_ID)", $_) }
 
 for:
   -

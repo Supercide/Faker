@@ -18,8 +18,6 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution 
 		build.ps1 = build.ps1
 	EndProjectSection
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Faker.Core.Extensions.Json", "src\Faker.Core.Extensions.Json\Faker.Core.Extensions.Json.csproj", "{D656F17A-FF55-4C0A-8062-ADCAF007285B}"
-EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -34,10 +32,6 @@ Global
 		{D59D8642-A53E-46BD-B682-6652113A2D20}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{D59D8642-A53E-46BD-B682-6652113A2D20}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{D59D8642-A53E-46BD-B682-6652113A2D20}.Release|Any CPU.Build.0 = Release|Any CPU
-		{D656F17A-FF55-4C0A-8062-ADCAF007285B}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{D656F17A-FF55-4C0A-8062-ADCAF007285B}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{D656F17A-FF55-4C0A-8062-ADCAF007285B}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{D656F17A-FF55-4C0A-8062-ADCAF007285B}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -45,7 +39,6 @@ Global
 	GlobalSection(NestedProjects) = preSolution
 		{954AF491-ECA6-4B36-95A1-03764D474D05} = {575B6963-ECEF-4108-B386-C2AA1B0CA0C8}
 		{D59D8642-A53E-46BD-B682-6652113A2D20} = {1FF55DB2-644E-4870-9B96-B3DC0DE5E21E}
-		{D656F17A-FF55-4C0A-8062-ADCAF007285B} = {1FF55DB2-644E-4870-9B96-B3DC0DE5E21E}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {B9386B53-E7F7-405B-B74F-89835F4AC706}
