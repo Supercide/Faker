@@ -27,12 +27,13 @@ namespace Faker.Tests
         public void GivenMultipleTemplates_WhenRetrievingTemplates_ThenReturnsTemplateWithMostMatchedFields()
         {
             string content = "{ \"a\": \"1\",\"b\": \"2\",\"c\": \"3\" }";
-            var templateOne = CreateTemplate("{ \"a\":\"1\" }");
-            var templateTwo = CreateTemplate("{ \"a\": \"1\",\"b\": \"2\" }");
-            var templateThree = CreateTemplate("{ \"a\": \"1\",\"b\": \"2\",\"c\": \"3\", \"d\": \"4\" }");
-            var expectedTemplate = CreateTemplate("{ \"a\": \"1\",\"b\": \"2\",\"c\": \"3\" }");
+            var templateOne = CreateTemplate(response:"{ \"a\":\"1\" }", properties:new []{"a"});
+            var templateTwo = CreateTemplate(response: "{ \"a\": \"1\",\"b\": \"2\" }", properties: new[] { "a", "b" });
+            var templateThree = CreateTemplate(response: "{ \"a\": \"1\",\"b\": \"2\",\"c\": \"3\", \"d\": \"4\" }", properties: new[] { "a", "b", "c", "d" });
+            var expectedTemplate = CreateTemplate(response: "{ \"a\": \"1\",\"b\": \"2\",\"c\": \"3\" }", properties: new[] { "a", "b", "c" });
 
             Mock<ITemplateStore> mockTemplateStore = new Mock<ITemplateStore>();
+
             mockTemplateStore.Setup(x => x.GetTemplates(It.IsAny<Uri>())).Returns(new [] {templateOne, templateTwo, templateThree, expectedTemplate });
 
             TemplateMatcher templateMatcher = new TemplateMatcher(mockTemplateStore.Object);
@@ -42,14 +43,31 @@ namespace Faker.Tests
             Assert.That(actualTemplate.Request, Is.EqualTo(expectedTemplate.Request));
         }
 
-        private static Template CreateTemplate(string incomingPattern)
+        [Test]
+        public void GivenUnkownTemplate_WhenRetrievingTemplates_ThenReturnsNoTemplate()
         {
-            Template templateOne = new Template
-            {
-                Request = incomingPattern
-            };
+            string unkownContent = "{ \"fgh\": \"1\",\"fghf\": \"2\",\"rtr\": \"3\" }";
+            var template = CreateTemplate(response: "{ \"a\": \"1\",\"b\": \"2\",\"c\": \"3\" }", properties: new[] { "a", "b", "c" });
 
-            return templateOne;
+            Mock<ITemplateStore> mockTemplateStore = new Mock<ITemplateStore>();
+
+            mockTemplateStore.Setup(x => x.GetTemplates(It.IsAny<Uri>())).Returns(new[] { template });
+
+            TemplateMatcher templateMatcher = new TemplateMatcher(mockTemplateStore.Object);
+
+            var actualTemplate = templateMatcher.Match(unkownContent, new Uri("http://anything"));
+
+            Assert.That(actualTemplate, Is.Null);
+        }
+
+        private static ITemplate CreateTemplate(string[] properties = null, string request = null, string response = null)
+        {
+            return new FakeTemplate
+            {
+                Response = response,
+                Properties = properties,
+                Request = request
+            };
         }
     }
 }

@@ -1,59 +1,46 @@
-﻿using System;
-using Faker.Core;
-using FFakerTests;
-using Newtonsoft.Json;
+﻿using Faker.Core;
+using Faker.Core.Extensions;
+using Moq;
 using NUnit.Framework;
 
-namespace Faker.Tests {
+namespace Faker.Tests
+{
     public class ResponseCreationTests
     {
         [Test]
-        public void GivenRequest_WhenCreatingResponseFromStaticTemplate_ThenCreatesResponse()
+        public void GivenDynamicTemplate_WhenCreatingResponseFromObject_ThenCreatesExpectedResponse()
         {
-            var request = "{ \"a\": \"1\",\"b\": \"2\",\"c\": \"3\" }";
+            var mockRequest = CreateMockRequestObject();
 
-            Template template = new Template
-            {
-                Response = "{ \"a\": \"1\",\"b\": \"2\",\"c\": \"3\" }"
-            };
-            
-            ResponseFactory factory = new ResponseFactory();
+            var mockTemplate = new Mock<ITemplate>();
 
-            var response = factory.Create(JsonRequest.Create(request), template);
+            mockTemplate.Setup(x => x.Response)
+                        .Returns("{ \"Message\": \"Captured : {{a}}, {{b}}, {{c}}\" }");
 
-            Assert.That(response, Is.EqualTo(template.Response));
-        }
+            var expectedResponse = "{ \"Message\": \"Captured : 1, 2, 3\" }";
 
-        [Test]
-        public void GivenDynamicTemplate_WhenCreatingResponseFromObject_ThenCreatesResponse()
-        {
-            var request = "{ \"a\": \"1\",\"b\": \"2\",\"c\": \"3\" }";
-            var expected = "{ \"Message\": \"Captured : 1, 2, 3\" }";
-            Template template = new Template
-            {
-                Response = "{ \"Message\": \"Captured : {{a}}, {{b}}, {{c}}\" }"
-            };
+            var factory = new ResponseFactory();
 
-            ResponseFactory factory = new ResponseFactory();
+            var response = factory.Create(mockRequest.Object, mockTemplate.Object);
 
-            var response = factory.Create(JsonRequest.Create(request), template);
-
-            Assert.That(response, Is.EqualTo(expected));
+            Assert.That(expectedResponse, Is.EqualTo(response));
         }
 
         [Test]
         public void GivenDynamicTemplate_WhenCreatingResponseFromObjectUsingIndexes_ThenCreatesResponse()
         {
-            var request = "{ \"a\": \"1\",\"b\": \"2\",\"c\": \"3\" }";
-            var expected = "{ \"Message\": \"Captured : 1, 2, 3\" }";
-            Template template = new Template
-            {
-                Response = "{ \"Message\": \"Captured : {{0}}, {{1}}, {{2}}\" }"
-            };
+            var mockRequest = CreateMockRequestArray();
 
-            ResponseFactory factory = new ResponseFactory();
+            var expected = "{ \"Message\": \"Captured : b, c, a\" }";
 
-            var response = factory.Create(JsonRequest.Create(request), template);
+            var mockTemplate = new Mock<ITemplate>();
+
+            mockTemplate.Setup(x => x.Response)
+                        .Returns("{ \"Message\": \"Captured : {{1}}, {{2}}, {{0}}\" }");
+
+            var factory = new ResponseFactory();
+
+            var response = factory.Create(mockRequest.Object, mockTemplate.Object);
 
             Assert.That(response, Is.EqualTo(expected));
         }
@@ -61,87 +48,69 @@ namespace Faker.Tests {
         [Test]
         public void GivenDynamicTemplate_WhenCreatingResponseFromNestedObject_ThenCreatesResponse()
         {
-            var request = JsonConvert.SerializeObject(NestedObject.Create());
-            var expected = "{ \"Message\": \"Captured : Elite, 1337, True, 2, Dam!, 1881, False, 5\" }";
-            Template template = new Template
-            {
-                Response = "{ \"Message\": \"Captured : {{String}}, {{Number}}, {{Bool}}, {{Array[1]}}, {{Nested.String}}, {{Nested.Number}}, {{Nested.Bool}}, {{Nested.Array[1]}}\" }"
-            };
-            
-            ResponseFactory factory = new ResponseFactory();
+            var mockRequest = CreateNestedMockRequestObject();
 
-            var response = factory.Create(JsonRequest.Create(request), template);
+            var mockTemplate = new Mock<ITemplate>();
 
-            Assert.That(response, Is.EqualTo(expected));
-        }
+            mockTemplate.Setup(x => x.Response)
+                        .Returns("{ \"Message\": \"Captured : {{String}}, {{Number}}, {{Bool}}, {{Array[1]}}, {{Nested.String}}, {{Nested.Number}}, {{Nested.Bool}}, {{Nested.Array[1]}}\" }");
 
-        [Test]
-        public void GivenDynamicTemplate_WhenCreatingResponseFromNestedObjectUsingIndexes_ThenCreatesResponse()
-        {
-            var request = JsonConvert.SerializeObject(NestedObject.Create());
-            var expected = "{ \"Message\": \"Captured : Elite, 1, 2, 3, 1337, True\" }";
-            Template template = new Template
-            {
-                Response = "{ \"Message\": \"Captured : {{0}}, {{1}}, {{2}}, {{3}}, {{4}}, {{5}}\" }"
-            };
+            var factory = new ResponseFactory();
 
-            ResponseFactory factory = new ResponseFactory();
+            var response = factory.Create(mockRequest.Object, mockTemplate.Object);
 
-            var response = factory.Create(JsonRequest.Create(request), template);
+            var expected = "{ \"Message\": \"Captured : String-0, Number-0, Bool-0, Array-0, Nested-String-0, Nested-Number-0, Nested-Bool-0, Nested-Array-0\" }";
 
             Assert.That(response, Is.EqualTo(expected));
         }
 
-
-        [Test]
-        public void GivenDynamicTemplate_WhenCreatingResponseFromArray_ThenCreatesResponse()
+        private static Mock<IRequest> CreateNestedMockRequestObject()
         {
-            var request = "[ \"a\",\"b\",\"c\" ]";
-            var expected = "{ \"Message\": \"Captured : a, b, c\" }";
-            Template template = new Template
-            {
-                Response = "{ \"Message\": \"Captured : {{0}}, {{1}}, {{2}}\" }"
-            };
+            var mockRequest = new Mock<IRequest>();
 
-            ResponseFactory factory = new ResponseFactory();
-
-            var response = factory.Create(JsonRequest.Create(request), template);
-
-            Assert.That(response, Is.EqualTo(expected));
+            mockRequest.Setup(x => x.GetPropertyValueBy("String"))
+                       .Returns("String-0");
+            mockRequest.Setup(x => x.GetPropertyValueBy("Number"))
+                       .Returns("Number-0");
+            mockRequest.Setup(x => x.GetPropertyValueBy("Bool"))
+                       .Returns("Bool-0");
+            mockRequest.Setup(x => x.GetPropertyValueBy("Array[1]"))
+                       .Returns("Array-0");
+            mockRequest.Setup(x => x.GetPropertyValueBy("Nested.String"))
+                       .Returns("Nested-String-0");
+            mockRequest.Setup(x => x.GetPropertyValueBy("Nested.Number"))
+                       .Returns("Nested-Number-0");
+            mockRequest.Setup(x => x.GetPropertyValueBy("Nested.Bool"))
+                       .Returns("Nested-Bool-0");
+            mockRequest.Setup(x => x.GetPropertyValueBy("Nested.Array[1]"))
+                       .Returns("Nested-Array-0");
+            return mockRequest;
         }
 
-        [Test]
-        public void GivenDynamicTemplate_WithRequestMissingToken_WhenCreatingResponseFromArray_ThenCreatesResponse_WithMissingTokenEmpty()
+        private static Mock<IRequest> CreateMockRequestObject()
         {
-            var request = "[ \"a\",\"b\",\"c\" ]";
-            var expected = "{ \"Message\": \"Captured : a, b, c \" }";
-            Template template = new Template
-            {
-                Response = "{ \"Message\": \"Captured : {{0}}, {{1}}, {{2}} {{3}}\" }"
-            };
+            var mockRequest = new Mock<IRequest>();
 
-            ResponseFactory factory = new ResponseFactory();
-
-            var response = factory.Create(JsonRequest.Create(request), template);
-
-            Assert.That(response, Is.EqualTo(expected));
+            mockRequest.Setup(x => x.GetPropertyValueBy("a"))
+                       .Returns("1");
+            mockRequest.Setup(x => x.GetPropertyValueBy("b"))
+                       .Returns("2");
+            mockRequest.Setup(x => x.GetPropertyValueBy("c"))
+                       .Returns("3");
+            return mockRequest;
         }
 
-        [Test]
-        public void GivenDynamicTemplate_WithRequestMissingToken_WhenCreatingResponseFromObject_ThenCreatesResponse_WithMissingTokenEmpty()
+        private static Mock<IRequest> CreateMockRequestArray()
         {
-            var request = "{ \"a\": \"1\",\"b\": \"2\",\"c\": \"3\" }";
-            var expected = "{ \"Message\": \"Captured : 1, 2, 3 \" }";
-            Template template = new Template
-            {
-                Response = "{ \"Message\": \"Captured : {{a}}, {{b}}, {{c}} {{d}}\" }"
-            };
+            var mockRequest = new Mock<IRequest>();
 
-            ResponseFactory factory = new ResponseFactory();
-
-            var response = factory.Create(JsonRequest.Create(request), template);
-
-            Assert.That(response, Is.EqualTo(expected));
+            mockRequest.Setup(x => x.GetPropertyValueBy(0))
+                       .Returns("a");
+            mockRequest.Setup(x => x.GetPropertyValueBy(1))
+                       .Returns("b");
+            mockRequest.Setup(x => x.GetPropertyValueBy(2))
+                       .Returns("c");
+            return mockRequest;
         }
     }
 }

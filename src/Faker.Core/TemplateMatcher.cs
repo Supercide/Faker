@@ -52,6 +52,8 @@ namespace Faker.Core
         {
             IEnumerable<TemplatePropertyMatchResult> matchingTemplates = FindAllTemplatesWithMatchingProperties(templates, request);
 
+            if (!matchingTemplates.Any()) return new List<TemplatePropertyMatchResult>();
+
             int maxMatches = matchingTemplates.Max(x => x.PropertyMatchCount);
 
             return matchingTemplates.Where(template => template.PropertyMatchCount == maxMatches).ToList();

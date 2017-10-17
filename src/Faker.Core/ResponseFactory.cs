@@ -2,37 +2,47 @@
 using System.Linq;
 using System.Text.RegularExpressions;
 using Faker.Core.Extensions;
-using Newtonsoft.Json.Linq;
 
 namespace Faker.Core {
     public class ResponseFactory
     {
-        public string Create(IRequest request, Template template)
+        public string Create(IRequest request, ITemplate template)
         {
             return MergeWithTemplate(request, template);
         }
 
-        private static string MergeWithTemplate(IRequest request, Template template)
+        private static string MergeWithTemplate(IRequest request, ITemplate template)
         {
             var mergeFields = GetMergeFields(request, template.Response);
 
-            return template.MergeFields(mergeFields);
+            string response = template.Response;
+
+            foreach (IMergeField mergeToken in mergeFields)
+            {
+                response = response.Replace(mergeToken.Token, mergeToken.Value);
+            }
+
+            return response;
         }
 
-        private static IEnumerable<MergeField> GetMergeFields(IRequest request, string mergeTemplate)
+        private static IEnumerable<IMergeField> GetMergeFields(IRequest request, string mergeTemplate)
         {
             var matches = SearchForTokens(mergeTemplate);
 
             return matches.Select(match => CreateMergeField(request, match));
         }
 
-        private static MergeField CreateMergeField(IRequest request, Match match)
+        private static IMergeField CreateMergeField(IRequest request, Match match)
         {
+            Property property = match.Groups[1].Value;
+
             return new MergeField
             {
                 Token = match.Value,
-                Property = match.Groups[1].Value,
-                Value = request.GetPropertyValueBy(match.Groups[1].Value)
+                Property = property,
+                Value = property.IsNumber
+                            ? request.GetPropertyValueBy(property.Index)
+                            : request.GetPropertyValueBy(property.Path)
             };
         }
 
@@ -40,7 +50,8 @@ namespace Faker.Core {
         {
             Regex regex = new Regex(@"\{\{(\S+)\}\}");
 
-           return  regex.Matches(mergeTemplate).Cast<Match>();
+           return regex.Matches(mergeTemplate)
+                       .Cast<Match>();
         }
     }
 }
