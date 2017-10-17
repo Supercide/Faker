@@ -25,14 +25,14 @@ namespace Faker.Core {
             return response;
         }
 
-        private static IEnumerable<MergeField> GetMergeFields(IRequest request, string mergeTemplate)
+        private static IEnumerable<IMergeField> GetMergeFields(IRequest request, string mergeTemplate)
         {
             var matches = SearchForTokens(mergeTemplate);
 
             return matches.Select(match => CreateMergeField(request, match));
         }
 
-        private static MergeField CreateMergeField(IRequest request, Match match)
+        private static IMergeField CreateMergeField(IRequest request, Match match)
         {
             Property property = match.Groups[1].Value;
 
