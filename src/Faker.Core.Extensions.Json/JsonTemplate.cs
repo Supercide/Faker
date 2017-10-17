@@ -15,17 +15,5 @@ namespace Faker.Core.Extensions.Json {
                           .Select(property => property.Name)
                           .ToList();
         }
-
-        public string MergeFields(IEnumerable<IMergeField> mergeFields)
-        {
-            string template = Response;
-
-            foreach (IMergeField mergeToken in mergeFields)
-            {
-                template = template.Replace(mergeToken.Token, mergeToken.Value);
-            }
-
-            return template;
-        }
     }
 }
