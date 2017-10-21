@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.Linq;
 using Faker.Core.Extensions;
-using Newtonsoft.Json.Linq;
 
 namespace Faker.Core
 {
@@ -15,18 +14,18 @@ namespace Faker.Core
             _templateStore = templateStore;
         }
 
-        public ITemplate Match(Uri @namespace, string content, Dictionary<string, string> metadata)
+        public ITemplate Match(Uri @namespace, IRequest request, Dictionary<string, string> metadata)
         {
             var templates = _templateStore.GetTemplates(@namespace);
 
             return templates.Any()
-                ? GetClosestMatchingTemplate(templates, content, metadata)?.Template
+                ? GetClosestMatchingTemplate(templates, request, metadata)?.Template
                 : null;
         }
 
-        private static TemplatePropertyMatchResult GetClosestMatchingTemplate(ITemplate[] templates, string content, Dictionary<string, string> metadata)
+        private static TemplatePropertyMatchResult GetClosestMatchingTemplate(ITemplate[] templates, IRequest request, Dictionary<string, string> metadata)
         {
-            IList<TemplatePropertyMatchResult> results = FindTemplatesWithMostMatchingProperties(templates, content, metadata);
+            IList<TemplatePropertyMatchResult> results = FindTemplatesWithMostMatchingProperties(templates, request, metadata);
 
             return results.Count > 1
                 ? FindTemplatesWithLeastAmountOfdifferences(results).First()
@@ -40,17 +39,9 @@ namespace Faker.Core
             return results.Where(result => result.TemplateProperties.Count() == minimumProperties);
         }
 
-        private static IEnumerable<string> GetRequestProperties(string request)
+        private static IList<TemplatePropertyMatchResult> FindTemplatesWithMostMatchingProperties(IEnumerable<ITemplate> templates, IRequest request, Dictionary<string, string> metadata)
         {
-            JObject token = JObject.Parse(string.IsNullOrEmpty(request) ? "{}" : request);
-
-            return token.Properties()
-                        .Select(property => property.Name);
-        }
-
-        private static IList<TemplatePropertyMatchResult> FindTemplatesWithMostMatchingProperties(IEnumerable<ITemplate> templates, string content, Dictionary<string, string> metadata)
-        {
-            IEnumerable<TemplatePropertyMatchResult> matchingTemplates = FindAllTemplatesWithMatchingProperties(templates, content, metadata);
+            IEnumerable<TemplatePropertyMatchResult> matchingTemplates = FindAllTemplatesWithMatchingProperties(templates, request, metadata);
 
             if (!matchingTemplates.Any()) return new List<TemplatePropertyMatchResult>();
 
@@ -59,9 +50,9 @@ namespace Faker.Core
             return matchingTemplates.Where(template => template.PropertyMatchCount == maxMatches).ToList();
         }
 
-        private static IList<TemplatePropertyMatchResult> FindAllTemplatesWithMatchingProperties(IEnumerable<ITemplate> templates, string content, Dictionary<string, string> metadata)
+        private static IList<TemplatePropertyMatchResult> FindAllTemplatesWithMatchingProperties(IEnumerable<ITemplate> templates, IRequest request, Dictionary<string, string> metadata)
         {
-            return templates.Select(template => CreateTemplateMatchResult(content, template))
+            return templates.Select(template => CreateTemplateMatchResult(request, template))
                             .Where(result => result.PropertyMatchCount > 0)
                             .Where(result => FilterMetadata(result, metadata))
                             .ToList();
@@ -75,9 +66,9 @@ namespace Faker.Core
                          .All(kvp => !metadata.ContainsKey(kvp.Key) || metadata[kvp.Key] == kvp.Value);
         }
 
-        private static TemplatePropertyMatchResult CreateTemplateMatchResult(string request, ITemplate template)
+        private static TemplatePropertyMatchResult CreateTemplateMatchResult(IRequest request, ITemplate template)
         {
-            IEnumerable<string> requestProperties = GetRequestProperties(request);
+            IEnumerable<string> requestProperties = request.GetProperties();
 
             IEnumerable<string> templateProperties = template.Request.GetProperties().ToArray();
 

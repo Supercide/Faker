@@ -15,11 +15,14 @@ namespace Faker.Tests
         {
             Uri expectedNamespace = new Uri("http://localhost/anyvalue");
 
+            Mock<IRequest> mockrequest = new Mock<IRequest>();
+            mockrequest.Setup(x => x.GetProperties()).Returns(new string[0]);
+
             Mock<ITemplateStore> mockTemplateStore = new Mock<ITemplateStore>();
 
             TemplateMatcher templateMatcher = new TemplateMatcher(mockTemplateStore.Object);
 
-            templateMatcher.Match(expectedNamespace, string.Empty, new Dictionary<string, string>());
+            templateMatcher.Match(expectedNamespace, mockrequest.Object, new Dictionary<string, string>());
 
             mockTemplateStore.Verify(x => x.GetTemplates(It.Is<Uri>(@namespace => @namespace == expectedNamespace)), Times.Once);
         }
@@ -27,7 +30,9 @@ namespace Faker.Tests
         [Test]
         public void GivenMultipleTemplates_WhenRetrievingTemplates_ThenReturnsTemplateWithMostMatchedFields()
         {
-            string content = "{ \"a\": \"1\",\"b\": \"2\",\"c\": \"3\" }";
+            Mock<IRequest> mockrequest = new Mock<IRequest>();
+            mockrequest.Setup(x => x.GetProperties()).Returns(new[] { "a", "b", "c" });
+
             var templateOne = CreateTemplate(response:"{ \"a\":\"1\" }", properties:new []{"a"});
             var templateTwo = CreateTemplate(response: "{ \"a\": \"1\",\"b\": \"2\" }", properties: new[] { "a", "b" });
             var templateThree = CreateTemplate(response: "{ \"a\": \"1\",\"b\": \"2\",\"c\": \"3\", \"d\": \"4\" }", properties: new[] { "a", "b", "c", "d" });
@@ -39,7 +44,7 @@ namespace Faker.Tests
 
             TemplateMatcher templateMatcher = new TemplateMatcher(mockTemplateStore.Object);
 
-            var actualTemplate = templateMatcher.Match(new Uri("http://anything"), content, new Dictionary<string, string>());
+            var actualTemplate = templateMatcher.Match(new Uri("http://anything"), mockrequest.Object, new Dictionary<string, string>());
 
             Assert.That(actualTemplate, Is.EqualTo(expectedTemplate));
         }
@@ -47,8 +52,8 @@ namespace Faker.Tests
         [Test]
         public void GivenMultipleTemplates_WhenRetrievingTemplates_ThenReturnsTemplateWithMatchingMetaData()
         {
-            string content = "{ \"a\": \"1\",\"b\": \"2\",\"c\": \"3\" }";
-
+            Mock<IRequest> mockrequest = new Mock<IRequest>();
+            mockrequest.Setup(x => x.GetProperties()).Returns(new[] { "a", "b", "c" });
             var template = CreateTemplate(response: "{ \"a\": \"1\",\"b\": \"2\",\"c\": \"3\" }", 
                                                   properties: new[] { "a", "b", "c" }, 
                                                   metadata: new Dictionary<string, string>()
@@ -71,8 +76,8 @@ namespace Faker.Tests
 
             TemplateMatcher templateMatcher = new TemplateMatcher(mockTemplateStore.Object);
 
-            var actualTemplate = templateMatcher.Match(new Uri("http://anything"), 
-                                                       content, 
+            var actualTemplate = templateMatcher.Match(new Uri("http://anything"),
+                                                       mockrequest.Object, 
                                                        new Dictionary<string, string>
                                                        {
                                                            {"Method", "POST"}
@@ -84,7 +89,9 @@ namespace Faker.Tests
         [Test]
         public void GivenUnkownTemplate_WhenRetrievingTemplates_ThenReturnsNoTemplate()
         {
-            string unkownContent = "{ \"fgh\": \"1\",\"fghf\": \"2\",\"rtr\": \"3\" }";
+            Mock<IRequest> mockrequest = new Mock<IRequest>();
+            mockrequest.Setup(x => x.GetProperties()).Returns(new[] { "fgh", "fghf", "rtr" });
+
             var template = CreateTemplate(response: "{ \"a\": \"1\",\"b\": \"2\",\"c\": \"3\" }", properties: new[] { "a", "b", "c" });
 
             Mock<ITemplateStore> mockTemplateStore = new Mock<ITemplateStore>();
@@ -93,7 +100,7 @@ namespace Faker.Tests
 
             TemplateMatcher templateMatcher = new TemplateMatcher(mockTemplateStore.Object);
 
-            var actualTemplate = templateMatcher.Match(new Uri("http://anything"), unkownContent, new Dictionary<string, string>());
+            var actualTemplate = templateMatcher.Match(new Uri("http://anything"), mockrequest.Object, new Dictionary<string, string>());
 
             Assert.That(actualTemplate, Is.Null);
         }
