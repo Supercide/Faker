@@ -8,7 +8,7 @@ namespace Faker.Tests {
         {
             return Properties;
         }
-        public string Request { get; set; }
+        public IRequest Request { get; set; }
         public string[] Properties { get; set; }
         public string Response { get; set; }
     }
