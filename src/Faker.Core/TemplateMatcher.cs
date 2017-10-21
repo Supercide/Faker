@@ -14,18 +14,18 @@ namespace Faker.Core
             _templateStore = templateStore;
         }
 
-        public ITemplate Match(Uri @namespace, IRequest request, Dictionary<string, string> metadata)
+        public ITemplate Match(Uri @namespace, IRequest request)
         {
             var templates = _templateStore.GetTemplates(@namespace);
 
             return templates.Any()
-                ? GetClosestMatchingTemplate(templates, request, metadata)?.Template
+                ? GetClosestMatchingTemplate(templates, request)?.Template
                 : null;
         }
 
-        private static TemplatePropertyMatchResult GetClosestMatchingTemplate(ITemplate[] templates, IRequest request, Dictionary<string, string> metadata)
+        private static TemplatePropertyMatchResult GetClosestMatchingTemplate(ITemplate[] templates, IRequest request)
         {
-            IList<TemplatePropertyMatchResult> results = FindTemplatesWithMostMatchingProperties(templates, request, metadata);
+            IList<TemplatePropertyMatchResult> results = FindTemplatesWithMostMatchingProperties(templates, request);
 
             return results.Count > 1
                 ? FindTemplatesWithLeastAmountOfdifferences(results).First()
@@ -39,9 +39,9 @@ namespace Faker.Core
             return results.Where(result => result.TemplateProperties.Count() == minimumProperties);
         }
 
-        private static IList<TemplatePropertyMatchResult> FindTemplatesWithMostMatchingProperties(IEnumerable<ITemplate> templates, IRequest request, Dictionary<string, string> metadata)
+        private static IList<TemplatePropertyMatchResult> FindTemplatesWithMostMatchingProperties(IEnumerable<ITemplate> templates, IRequest request)
         {
-            IEnumerable<TemplatePropertyMatchResult> matchingTemplates = FindAllTemplatesWithMatchingProperties(templates, request, metadata);
+            IEnumerable<TemplatePropertyMatchResult> matchingTemplates = FindAllTemplatesWithMatchingProperties(templates, request);
 
             if (!matchingTemplates.Any()) return new List<TemplatePropertyMatchResult>();
 
@@ -50,15 +50,15 @@ namespace Faker.Core
             return matchingTemplates.Where(template => template.PropertyMatchCount == maxMatches).ToList();
         }
 
-        private static IList<TemplatePropertyMatchResult> FindAllTemplatesWithMatchingProperties(IEnumerable<ITemplate> templates, IRequest request, Dictionary<string, string> metadata)
+        private static IList<TemplatePropertyMatchResult> FindAllTemplatesWithMatchingProperties(IEnumerable<ITemplate> templates, IRequest request)
         {
             return templates.Select(template => CreateTemplateMatchResult(request, template))
                             .Where(result => result.PropertyMatchCount > 0)
-                            .Where(result => FilterMetadata(result, metadata))
+                            .Where(result => FilterMetadata(result, request.Metadata))
                             .ToList();
         }
 
-        private static bool FilterMetadata(TemplatePropertyMatchResult result, Dictionary<string, string> metadata)
+        private static bool FilterMetadata(TemplatePropertyMatchResult result, IReadOnlyDictionary<string, string> metadata)
         {
             return result.Template
                          .Request

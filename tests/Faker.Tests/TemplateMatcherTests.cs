@@ -22,7 +22,7 @@ namespace Faker.Tests
 
             TemplateMatcher templateMatcher = new TemplateMatcher(mockTemplateStore.Object);
 
-            templateMatcher.Match(expectedNamespace, mockrequest.Object, new Dictionary<string, string>());
+            templateMatcher.Match(expectedNamespace, mockrequest.Object);
 
             mockTemplateStore.Verify(x => x.GetTemplates(It.Is<Uri>(@namespace => @namespace == expectedNamespace)), Times.Once);
         }
@@ -44,7 +44,7 @@ namespace Faker.Tests
 
             TemplateMatcher templateMatcher = new TemplateMatcher(mockTemplateStore.Object);
 
-            var actualTemplate = templateMatcher.Match(new Uri("http://anything"), mockrequest.Object, new Dictionary<string, string>());
+            var actualTemplate = templateMatcher.Match(new Uri("http://anything"), mockrequest.Object);
 
             Assert.That(actualTemplate, Is.EqualTo(expectedTemplate));
         }
@@ -54,6 +54,11 @@ namespace Faker.Tests
         {
             Mock<IRequest> mockrequest = new Mock<IRequest>();
             mockrequest.Setup(x => x.GetProperties()).Returns(new[] { "a", "b", "c" });
+            mockrequest.Setup(x => x.Metadata).Returns(new Dictionary<string, string>
+                                                       {
+                                                           {"Method", "POST"}
+                                                       });
+
             var template = CreateTemplate(response: "{ \"a\": \"1\",\"b\": \"2\",\"c\": \"3\" }", 
                                                   properties: new[] { "a", "b", "c" }, 
                                                   metadata: new Dictionary<string, string>()
@@ -77,11 +82,7 @@ namespace Faker.Tests
             TemplateMatcher templateMatcher = new TemplateMatcher(mockTemplateStore.Object);
 
             var actualTemplate = templateMatcher.Match(new Uri("http://anything"),
-                                                       mockrequest.Object, 
-                                                       new Dictionary<string, string>
-                                                       {
-                                                           {"Method", "POST"}
-                                                       });
+                                                       mockrequest.Object);
 
             Assert.That(actualTemplate, Is.EqualTo(expectedTemplate));
         }
@@ -100,7 +101,7 @@ namespace Faker.Tests
 
             TemplateMatcher templateMatcher = new TemplateMatcher(mockTemplateStore.Object);
 
-            var actualTemplate = templateMatcher.Match(new Uri("http://anything"), mockrequest.Object, new Dictionary<string, string>());
+            var actualTemplate = templateMatcher.Match(new Uri("http://anything"), mockrequest.Object);
 
             Assert.That(actualTemplate, Is.Null);
         }
