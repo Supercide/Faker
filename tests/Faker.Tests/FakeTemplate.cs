@@ -10,6 +10,6 @@ namespace Faker.Tests {
         }
         public IRequest Request { get; set; }
         public string[] Properties { get; set; }
-        public string Response { get; set; }
+        public IResponse Response { get; set; }
     }
 }
