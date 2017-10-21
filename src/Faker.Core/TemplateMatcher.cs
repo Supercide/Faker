@@ -15,18 +15,18 @@ namespace Faker.Core
             _templateStore = templateStore;
         }
 
-        public ITemplate Match(string pattern, Uri @namespace)
+        public ITemplate Match(Uri @namespace, string content, Dictionary<string, string> metadata)
         {
             var templates = _templateStore.GetTemplates(@namespace);
 
             return templates.Any()
-                ? GetClosestMatchingTemplate(templates, pattern)?.Template
+                ? GetClosestMatchingTemplate(templates, content, metadata)?.Template
                 : null;
         }
 
-        private static TemplatePropertyMatchResult GetClosestMatchingTemplate(ITemplate[] templates, string request)
+        private static TemplatePropertyMatchResult GetClosestMatchingTemplate(ITemplate[] templates, string content, Dictionary<string, string> metadata)
         {
-            IList<TemplatePropertyMatchResult> results = FindTemplatesWithMostMatchingProperties(templates, request);
+            IList<TemplatePropertyMatchResult> results = FindTemplatesWithMostMatchingProperties(templates, content, metadata);
 
             return results.Count > 1
                 ? FindTemplatesWithLeastAmountOfdifferences(results).First()
@@ -48,9 +48,9 @@ namespace Faker.Core
                         .Select(property => property.Name);
         }
 
-        private static IList<TemplatePropertyMatchResult> FindTemplatesWithMostMatchingProperties(IEnumerable<ITemplate> templates, string request)
+        private static IList<TemplatePropertyMatchResult> FindTemplatesWithMostMatchingProperties(IEnumerable<ITemplate> templates, string content, Dictionary<string, string> metadata)
         {
-            IEnumerable<TemplatePropertyMatchResult> matchingTemplates = FindAllTemplatesWithMatchingProperties(templates, request);
+            IEnumerable<TemplatePropertyMatchResult> matchingTemplates = FindAllTemplatesWithMatchingProperties(templates, content, metadata);
 
             if (!matchingTemplates.Any()) return new List<TemplatePropertyMatchResult>();
 
@@ -59,18 +59,27 @@ namespace Faker.Core
             return matchingTemplates.Where(template => template.PropertyMatchCount == maxMatches).ToList();
         }
 
-        private static IList<TemplatePropertyMatchResult> FindAllTemplatesWithMatchingProperties(IEnumerable<ITemplate> templates, string request)
+        private static IList<TemplatePropertyMatchResult> FindAllTemplatesWithMatchingProperties(IEnumerable<ITemplate> templates, string content, Dictionary<string, string> metadata)
         {
-            return templates.Select(template => CalculatePropertiesMatchingInTemplate(request, template))
+            return templates.Select(template => CreateTemplateMatchResult(content, template))
                             .Where(result => result.PropertyMatchCount > 0)
+                            .Where(result => FilterMetadata(result, metadata))
                             .ToList();
         }
 
-        private static TemplatePropertyMatchResult CalculatePropertiesMatchingInTemplate(string request, ITemplate template)
+        private static bool FilterMetadata(TemplatePropertyMatchResult result, Dictionary<string, string> metadata)
+        {
+            return result.Template
+                         .Request
+                         .Metadata
+                         .All(kvp => !metadata.ContainsKey(kvp.Key) || metadata[kvp.Key] == kvp.Value);
+        }
+
+        private static TemplatePropertyMatchResult CreateTemplateMatchResult(string request, ITemplate template)
         {
             IEnumerable<string> requestProperties = GetRequestProperties(request);
 
-            IList<string> templateProperties = template.GetProperties();
+            IEnumerable<string> templateProperties = template.Request.GetProperties().ToArray();
 
             return new TemplatePropertyMatchResult
             {
@@ -80,7 +89,7 @@ namespace Faker.Core
             };
         }
 
-        private static int GetPropertyMatchCount(IEnumerable<string> propertiesLeft, IList<string> propertiesRight)
+        private static int GetPropertyMatchCount(IEnumerable<string> propertiesLeft, IEnumerable<string> propertiesRight)
         {
             return propertiesLeft.Count(propertiesRight.Contains);
         }
