@@ -6,12 +6,12 @@ using Faker.Core.Extensions;
 namespace Faker.Core {
     public class ResponseFactory
     {
-        public string Create(IRequest request, ITemplate template)
+        public Response Create(IRequest request, ITemplate template)
         {
             return MergeWithTemplate(request, template);
         }
 
-        private static string MergeWithTemplate(IRequest request, ITemplate template)
+        private static Response MergeWithTemplate(IRequest request, ITemplate template)
         {
             var mergeFields = GetMergeFields(request, template.Response);
 
@@ -22,7 +22,11 @@ namespace Faker.Core {
                 response = response.Replace(mergeToken.Token, mergeToken.Value);
             }
 
-            return response;
+            return new Response
+            {
+                Content = response,
+                Metadata = template.Response.Metadata
+            };
         }
 
         private static IEnumerable<IMergeField> GetMergeFields(IRequest request, IResponse response)

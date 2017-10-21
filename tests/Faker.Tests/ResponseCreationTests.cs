@@ -27,7 +27,7 @@ namespace Faker.Tests
 
             var response = factory.Create(mockRequest.Object, mockTemplate.Object);
 
-            Assert.That(expectedResponse, Is.EqualTo(response));
+            Assert.That(expectedResponse, Is.EqualTo(response.Content));
         }
 
         [Test]
@@ -51,7 +51,7 @@ namespace Faker.Tests
 
             var response = factory.Create(mockRequest.Object, mockTemplate.Object);
 
-            Assert.That(response, Is.EqualTo(expected));
+            Assert.That(response.Content, Is.EqualTo(expected));
         }
 
         [Test]
@@ -74,7 +74,7 @@ namespace Faker.Tests
 
             var expected = "{ \"Message\": \"Captured : String-0, Number-0, Bool-0, Array-0, Nested-String-0, Nested-Number-0, Nested-Bool-0, Nested-Array-0\" }";
 
-            Assert.That(response, Is.EqualTo(expected));
+            Assert.That(response.Content, Is.EqualTo(expected));
         }
 
         private static Mock<IRequest> CreateNestedMockRequestObject()
