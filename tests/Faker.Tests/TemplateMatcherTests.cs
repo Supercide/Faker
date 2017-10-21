@@ -119,10 +119,13 @@ namespace Faker.Tests
                            .Returns(metadata??new Dictionary<string, string>());
             }
             
+            Mock<IResponse> mockResponse = new Mock<IResponse>();
+            mockResponse.Setup(x => x.Content)
+                        .Returns(response);
 
             return new FakeTemplate
             {
-                Response = response,
+                Response = mockResponse.Object,
                 Properties = properties,
                 Request = mockRequest.Object
             };

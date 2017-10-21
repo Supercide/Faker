@@ -15,7 +15,7 @@ namespace Faker.Core {
         {
             var mergeFields = GetMergeFields(request, template.Response);
 
-            string response = template.Response;
+            string response = template.Response.Content;
 
             foreach (IMergeField mergeToken in mergeFields)
             {
@@ -25,9 +25,9 @@ namespace Faker.Core {
             return response;
         }
 
-        private static IEnumerable<IMergeField> GetMergeFields(IRequest request, string mergeTemplate)
+        private static IEnumerable<IMergeField> GetMergeFields(IRequest request, IResponse response)
         {
-            var matches = SearchForTokens(mergeTemplate);
+            var matches = SearchForTokens(response.Content);
 
             return matches.Select(match => CreateMergeField(request, match));
         }
