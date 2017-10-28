@@ -14,12 +14,8 @@ namespace Faker.Tests
 
             var mockTemplate = new Mock<ITemplate>();
 
-            var mockResponse = new Mock<IResponse>();
-            mockResponse.Setup(x => x.Content)
-                        .Returns("{ \"Message\": \"Captured : {{a}}, {{b}}, {{c}}\" }");
-
             mockTemplate.Setup(x => x.Response)
-                        .Returns(mockResponse.Object);
+                        .Returns("{ \"Message\": \"Captured : {{a}}, {{b}}, {{c}}\" }");
 
             var expectedResponse = "{ \"Message\": \"Captured : 1, 2, 3\" }";
 
@@ -37,15 +33,10 @@ namespace Faker.Tests
 
             var expected = "{ \"Message\": \"Captured : b, c, a\" }";
 
-            var mockResponse = new Mock<IResponse>();
-
-            mockResponse.Setup(x => x.Content)
-                        .Returns("{ \"Message\": \"Captured : {{1}}, {{2}}, {{0}}\" }");
-
             var mockTemplate = new Mock<ITemplate>();
 
             mockTemplate.Setup(x => x.Response)
-                        .Returns(mockResponse.Object);
+                        .Returns("{ \"Message\": \"Captured : {{1}}, {{2}}, {{0}}\" }");
 
             var factory = new ResponseFactory();
 
@@ -59,14 +50,10 @@ namespace Faker.Tests
         {
             var mockRequest = CreateNestedMockRequestObject();
 
-            var mockResponse = new Mock<IResponse>();
-            mockResponse.Setup(x => x.Content)
-                        .Returns("{ \"Message\": \"Captured : {{String}}, {{Number}}, {{Bool}}, {{Array[1]}}, {{Nested.String}}, {{Nested.Number}}, {{Nested.Bool}}, {{Nested.Array[1]}}\" }");
-
             var mockTemplate = new Mock<ITemplate>();
 
             mockTemplate.Setup(x => x.Response)
-                        .Returns(mockResponse.Object);
+                        .Returns("{ \"Message\": \"Captured : {{String}}, {{Number}}, {{Bool}}, {{Array[1]}}, {{Nested.String}}, {{Nested.Number}}, {{Nested.Bool}}, {{Nested.Array[1]}}\" }");
 
             var factory = new ResponseFactory();
 

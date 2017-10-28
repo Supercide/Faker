@@ -16,14 +16,14 @@ namespace Faker.Core
 
         public ITemplate Match(Uri @namespace, IRequest request)
         {
-            var templates = _templateStore.GetTemplates(@namespace);
+            var templateContainer = _templateStore.GetTemplateContainer(@namespace);
 
-            return templates.Any()
-                ? GetClosestMatchingTemplate(templates, request)?.Template
+            return templateContainer?.Templates?.Any()??false
+                ? GetClosestMatchingTemplate(templateContainer.Templates, request)?.Template
                 : null;
         }
 
-        private static TemplatePropertyMatchResult GetClosestMatchingTemplate(ITemplate[] templates, IRequest request)
+        private static TemplatePropertyMatchResult GetClosestMatchingTemplate(IEnumerable<ITemplate> templates, IRequest request)
         {
             IList<TemplatePropertyMatchResult> results = FindTemplatesWithMostMatchingProperties(templates, request);
 
@@ -61,16 +61,15 @@ namespace Faker.Core
         private static bool FilterMetadata(TemplatePropertyMatchResult result, IReadOnlyDictionary<string, string> metadata)
         {
             return result.Template
-                         .Request
-                         .Metadata
-                         .All(kvp => !metadata.ContainsKey(kvp.Key) || metadata[kvp.Key] == kvp.Value);
+                         .Metadata?
+                         .All(kvp => !metadata.ContainsKey(kvp.Key) || metadata[kvp.Key] == kvp.Value)??true;
         }
 
         private static TemplatePropertyMatchResult CreateTemplateMatchResult(IRequest request, ITemplate template)
         {
             IEnumerable<string> requestProperties = request.GetProperties();
 
-            IEnumerable<string> templateProperties = template.Request.GetProperties().ToArray();
+            IEnumerable<string> templateProperties = template.Properties.Keys;
 
             return new TemplatePropertyMatchResult
             {

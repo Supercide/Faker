@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using Faker.Core;
 using Faker.Core.Extensions;
 using Moq;
@@ -24,7 +25,7 @@ namespace Faker.Tests
 
             templateMatcher.Match(expectedNamespace, mockrequest.Object);
 
-            mockTemplateStore.Verify(x => x.GetTemplates(It.Is<Uri>(@namespace => @namespace == expectedNamespace)), Times.Once);
+            mockTemplateStore.Verify(x => x.GetTemplateContainer(It.Is<Uri>(@namespace => @namespace == expectedNamespace)), Times.Once);
         }
 
         [Test]
@@ -39,8 +40,10 @@ namespace Faker.Tests
             var expectedTemplate = CreateTemplate(response: "{ \"a\": \"1\",\"b\": \"2\",\"c\": \"3\" }", properties: new[] { "a", "b", "c" });
 
             Mock<ITemplateStore> mockTemplateStore = new Mock<ITemplateStore>();
+            Mock<ITemplateContainer> mockTemplateContainer = new Mock<ITemplateContainer>();
+            mockTemplateContainer.Setup(x => x.Templates).Returns(new[] { templateOne, templateTwo, templateThree, expectedTemplate });
 
-            mockTemplateStore.Setup(x => x.GetTemplates(It.IsAny<Uri>())).Returns(new [] {templateOne, templateTwo, templateThree, expectedTemplate });
+            mockTemplateStore.Setup(x => x.GetTemplateContainer(It.IsAny<Uri>())).Returns(mockTemplateContainer.Object);
 
             TemplateMatcher templateMatcher = new TemplateMatcher(mockTemplateStore.Object);
 
@@ -76,8 +79,9 @@ namespace Faker.Tests
                                                   });
 
             Mock<ITemplateStore> mockTemplateStore = new Mock<ITemplateStore>();
-
-            mockTemplateStore.Setup(x => x.GetTemplates(It.IsAny<Uri>())).Returns(new[] { expectedTemplate, template });
+            Mock<ITemplateContainer> mockTemplateContainer = new Mock<ITemplateContainer>();
+            mockTemplateContainer.Setup(x => x.Templates).Returns(new[] { expectedTemplate, template });
+            mockTemplateStore.Setup(x => x.GetTemplateContainer(It.IsAny<Uri>())).Returns(mockTemplateContainer.Object);
 
             TemplateMatcher templateMatcher = new TemplateMatcher(mockTemplateStore.Object);
 
@@ -96,8 +100,9 @@ namespace Faker.Tests
             var template = CreateTemplate(response: "{ \"a\": \"1\",\"b\": \"2\",\"c\": \"3\" }", properties: new[] { "a", "b", "c" });
 
             Mock<ITemplateStore> mockTemplateStore = new Mock<ITemplateStore>();
-
-            mockTemplateStore.Setup(x => x.GetTemplates(It.IsAny<Uri>())).Returns(new[] { template });
+            Mock<ITemplateContainer> mockTemplateContainer = new Mock<ITemplateContainer>();
+            mockTemplateContainer.Setup(x => x.Templates).Returns(new[] { template });
+            mockTemplateStore.Setup(x => x.GetTemplateContainer(It.IsAny<Uri>())).Returns(mockTemplateContainer.Object);
 
             TemplateMatcher templateMatcher = new TemplateMatcher(mockTemplateStore.Object);
 
@@ -123,12 +128,7 @@ namespace Faker.Tests
             mockResponse.Setup(x => x.Content)
                         .Returns(response);
 
-            return new FakeTemplate
-            {
-                Response = mockResponse.Object,
-                Properties = properties,
-                Request = mockRequest.Object
-            };
+            return new Template(metadata, properties?.ToDictionary(x => x, x => string.Empty), response);
         }
     }
 }
