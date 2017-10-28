@@ -3,10 +3,10 @@ using System.Collections.Generic;
 using Faker.Core.Extensions;
 
 namespace Faker.Core {
-    public class TemplateContainer : ITemplateContainer
+    public class TemplateContainer : ITemplateContainer<Template>
     {
-        public Uri Namespace { get; protected set; }
+        public Uri Namespace { get; set; }
 
-        public IEnumerable<ITemplate> Templates { get; protected set; }
+        public List<Template> Templates { get; set; }
     }
 }

@@ -7,9 +7,9 @@ namespace Faker.Core
 {
     public class TemplateMatcher
     {
-        private readonly ITemplateStore _templateStore;
+        private readonly ITemplateStore<ITemplate> _templateStore;
 
-        public TemplateMatcher(ITemplateStore templateStore)
+        public TemplateMatcher(ITemplateStore<ITemplate> templateStore)
         {
             _templateStore = templateStore;
         }

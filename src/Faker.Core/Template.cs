@@ -11,11 +11,11 @@ namespace Faker.Core {
             Response = response;
         }
 
-        public IReadOnlyDictionary<string, string> Properties { get; protected set; }
+        public Dictionary<string, string> Properties { get; set; }
 
-        public IReadOnlyDictionary<string, string> Metadata { get; protected set; }
+        public Dictionary<string, string> Metadata { get; set; }
 
-        public string Response { get; protected set; }
+        public string Response { get; set; }
 
     }
 }
