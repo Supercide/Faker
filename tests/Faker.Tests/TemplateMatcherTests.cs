@@ -21,7 +21,7 @@ namespace Faker.Tests
 
             Mock<ITemplateStore<ITemplate>> mockTemplateStore = new Mock<ITemplateStore<ITemplate>>();
 
-            TemplateMatcher templateMatcher = new TemplateMatcher(mockTemplateStore.Object);
+            TemplateMatcher<ITemplate> templateMatcher = new TemplateMatcher<ITemplate>(mockTemplateStore.Object);
 
             templateMatcher.Match(expectedNamespace, mockrequest.Object);
 
@@ -45,7 +45,7 @@ namespace Faker.Tests
 
             mockTemplateStore.Setup(x => x.GetTemplateContainer(It.IsAny<Uri>())).Returns(mockTemplateContainer.Object);
 
-            TemplateMatcher templateMatcher = new TemplateMatcher(mockTemplateStore.Object);
+            TemplateMatcher<ITemplate> templateMatcher = new TemplateMatcher<ITemplate>(mockTemplateStore.Object);
 
             var actualTemplate = templateMatcher.Match(new Uri("http://anything"), mockrequest.Object);
 
@@ -83,7 +83,7 @@ namespace Faker.Tests
             mockTemplateContainer.Setup(x => x.Templates).Returns(new[] { expectedTemplate, template }.ToList());
             mockTemplateStore.Setup(x => x.GetTemplateContainer(It.IsAny<Uri>())).Returns(mockTemplateContainer.Object);
 
-            TemplateMatcher templateMatcher = new TemplateMatcher(mockTemplateStore.Object);
+            TemplateMatcher<ITemplate> templateMatcher = new TemplateMatcher<ITemplate>(mockTemplateStore.Object);
 
             var actualTemplate = templateMatcher.Match(new Uri("http://anything"),
                                                        mockrequest.Object);
@@ -104,7 +104,7 @@ namespace Faker.Tests
             mockTemplateContainer.Setup(x => x.Templates).Returns(new[] { template }.ToList());
             mockTemplateStore.Setup(x => x.GetTemplateContainer(It.IsAny<Uri>())).Returns(mockTemplateContainer.Object);
 
-            TemplateMatcher templateMatcher = new TemplateMatcher(mockTemplateStore.Object);
+            TemplateMatcher<ITemplate> templateMatcher = new TemplateMatcher<ITemplate>(mockTemplateStore.Object);
 
             var actualTemplate = templateMatcher.Match(new Uri("http://anything"), mockrequest.Object);
 

@@ -5,52 +5,55 @@ using Faker.Core.Extensions;
 
 namespace Faker.Core
 {
-    public class TemplateMatcher
+    public class TemplateMatcher<T> where T : ITemplate
     {
-        private readonly ITemplateStore<ITemplate> _templateStore;
+        private readonly ITemplateStore<T> _templateStore;
 
-        public TemplateMatcher(ITemplateStore<ITemplate> templateStore)
+        public TemplateMatcher(ITemplateStore<T> templateStore)
         {
             _templateStore = templateStore;
         }
 
-        public ITemplate Match(Uri @namespace, IRequest request)
+        public T Match(Uri @namespace, IRequest request)
         {
-            var templateContainer = _templateStore.GetTemplateContainer(@namespace);
+            ITemplateContainer<T> templateContainer = _templateStore.GetTemplateContainer(@namespace);
 
-            return templateContainer?.Templates?.Any()??false
-                ? GetClosestMatchingTemplate(templateContainer.Templates, request)?.Template
-                : null;
+            if(templateContainer?.Templates?.Any() ?? false)
+            {
+                return GetClosestMatchingTemplate(templateContainer.Templates, request).Template;
+            }
+
+            return default(T);
         }
 
-        private static TemplatePropertyMatchResult GetClosestMatchingTemplate(IEnumerable<ITemplate> templates, IRequest request)
+        private static TemplatePropertyMatchResult<T> GetClosestMatchingTemplate(IEnumerable<T> templates, IRequest request)
         {
-            IList<TemplatePropertyMatchResult> results = FindTemplatesWithMostMatchingProperties(templates, request);
+            IList<TemplatePropertyMatchResult<T>> results = FindTemplatesWithMostMatchingProperties(templates, request);
 
             return results.Count > 1
                 ? FindTemplatesWithLeastAmountOfdifferences(results).First()
                 : results.FirstOrDefault();
         }
 
-        private static IEnumerable<TemplatePropertyMatchResult> FindTemplatesWithLeastAmountOfdifferences(IList<TemplatePropertyMatchResult> results)
+        private static IEnumerable<TemplatePropertyMatchResult<T>> FindTemplatesWithLeastAmountOfdifferences(IList<TemplatePropertyMatchResult<T>> results)
         {
             var minimumProperties = results.Min(result => result.TemplateProperties.Count());
 
             return results.Where(result => result.TemplateProperties.Count() == minimumProperties);
         }
 
-        private static IList<TemplatePropertyMatchResult> FindTemplatesWithMostMatchingProperties(IEnumerable<ITemplate> templates, IRequest request)
+        private static IList<TemplatePropertyMatchResult<T>> FindTemplatesWithMostMatchingProperties(IEnumerable<T> templates, IRequest request)
         {
-            IEnumerable<TemplatePropertyMatchResult> matchingTemplates = FindAllTemplatesWithMatchingProperties(templates, request);
+            IEnumerable<TemplatePropertyMatchResult<T>> matchingTemplates = FindAllTemplatesWithMatchingProperties(templates, request);
 
-            if (!matchingTemplates.Any()) return new List<TemplatePropertyMatchResult>();
+            if (!matchingTemplates.Any()) return new List<TemplatePropertyMatchResult<T>>();
 
             int maxMatches = matchingTemplates.Max(x => x.PropertyMatchCount);
 
             return matchingTemplates.Where(template => template.PropertyMatchCount == maxMatches).ToList();
         }
 
-        private static IList<TemplatePropertyMatchResult> FindAllTemplatesWithMatchingProperties(IEnumerable<ITemplate> templates, IRequest request)
+        private static IList<TemplatePropertyMatchResult<T>> FindAllTemplatesWithMatchingProperties(IEnumerable<T> templates, IRequest request)
         {
             return templates.Select(template => CreateTemplateMatchResult(request, template))
                             .Where(result => result.PropertyMatchCount > 0)
@@ -58,20 +61,20 @@ namespace Faker.Core
                             .ToList();
         }
 
-        private static bool FilterMetadata(TemplatePropertyMatchResult result, IReadOnlyDictionary<string, string> metadata)
+        private static bool FilterMetadata(TemplatePropertyMatchResult<T> result, IReadOnlyDictionary<string, string> metadata)
         {
             return result.Template
                          .Metadata?
                          .All(kvp => !metadata.ContainsKey(kvp.Key) || metadata[kvp.Key] == kvp.Value)??true;
         }
 
-        private static TemplatePropertyMatchResult CreateTemplateMatchResult(IRequest request, ITemplate template)
+        private static TemplatePropertyMatchResult<T> CreateTemplateMatchResult(IRequest request, T template)
         {
             IEnumerable<string> requestProperties = request.GetProperties();
 
             IEnumerable<string> templateProperties = template.Properties.Keys;
 
-            return new TemplatePropertyMatchResult
+            return new TemplatePropertyMatchResult<T>
             {
                 Template = template,
                 PropertyMatchCount = GetPropertyMatchCount(requestProperties, templateProperties),

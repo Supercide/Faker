@@ -2,10 +2,10 @@
 using Faker.Core.Extensions;
 
 namespace Faker.Core {
-    public class TemplatePropertyMatchResult
+    public class TemplatePropertyMatchResult<T> where T : ITemplate
     {
         public IEnumerable<string> TemplateProperties { get; set; }
         public int PropertyMatchCount { get; set; }
-        public ITemplate Template { get; set; }
+        public T Template { get; set; }
     }
 }
