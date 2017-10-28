@@ -20,7 +20,9 @@ namespace Faker.Core
 
             if(templateContainer?.Templates?.Any() ?? false)
             {
-                return GetClosestMatchingTemplate(templateContainer.Templates, request).Template;
+                var result = GetClosestMatchingTemplate(templateContainer.Templates, request);
+                if(result == null) return default(T);
+                return result.Template;
             }
 
             return default(T);
