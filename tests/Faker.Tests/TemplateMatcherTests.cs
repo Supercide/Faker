@@ -127,8 +127,18 @@ namespace Faker.Tests
             Mock<IResponse> mockResponse = new Mock<IResponse>();
             mockResponse.Setup(x => x.Content)
                         .Returns(response);
+            Mock<ITemplate> mockTemplate = new Mock<ITemplate>();
 
-            return new Template(metadata, properties?.ToDictionary(x => x, x => string.Empty), response);
+            mockTemplate.Setup(x => x.Metadata)
+                        .Returns(metadata);
+
+            mockTemplate.Setup(x => x.Properties)
+                        .Returns(properties?.ToDictionary(x => x, x => string.Empty));
+
+            mockTemplate.Setup(x => x.Response)
+                        .Returns(response);
+
+            return mockTemplate.Object;
         }
     }
 }
