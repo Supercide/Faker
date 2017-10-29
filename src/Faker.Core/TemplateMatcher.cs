@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading;
+using System.Threading.Tasks;
 using Faker.Core.Extensions;
 
 namespace Faker.Core
@@ -14,9 +16,9 @@ namespace Faker.Core
             _templateStore = templateStore;
         }
 
-        public T Match(Uri @namespace, IRequest request)
+        public async Task<T> MatchAsync(Uri @namespace, IRequest request, CancellationToken token)
         {
-            ITemplateContainer<T> templateContainer = _templateStore.GetTemplateContainer(@namespace);
+            ITemplateContainer<T> templateContainer = await _templateStore.GetTemplateContainerAsync(@namespace, token);
 
             if(templateContainer?.Templates?.Any() ?? false)
             {

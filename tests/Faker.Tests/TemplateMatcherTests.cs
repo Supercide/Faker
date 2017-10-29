@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading;
+using System.Threading.Tasks;
 using Faker.Core;
 using Faker.Core.Extensions;
 using Moq;
@@ -12,7 +14,7 @@ namespace Faker.Tests
     public class TemplateMatcherTests
     {
         [Test]
-        public void GivenKnownContent_WhenRetrievingTemplates_ThenCallsTemplateStoreWithNameSpace()
+        public async Task GivenKnownContent_WhenRetrievingTemplates_ThenCallsTemplateStoreWithNameSpace()
         {
             Uri expectedNamespace = new Uri("http://localhost/anyvalue");
 
@@ -23,13 +25,13 @@ namespace Faker.Tests
 
             TemplateMatcher<ITemplate> templateMatcher = new TemplateMatcher<ITemplate>(mockTemplateStore.Object);
 
-            templateMatcher.Match(expectedNamespace, mockrequest.Object);
+            await templateMatcher.MatchAsync(expectedNamespace, mockrequest.Object, CancellationToken.None);
 
-            mockTemplateStore.Verify(x => x.GetTemplateContainer(It.Is<Uri>(@namespace => @namespace == expectedNamespace)), Times.Once);
+            mockTemplateStore.Verify(x => x.GetTemplateContainerAsync(It.Is<Uri>(@namespace => @namespace == expectedNamespace), CancellationToken.None), Times.Once);
         }
 
         [Test]
-        public void GivenMultipleTemplates_WhenRetrievingTemplates_ThenReturnsTemplateWithMostMatchedFields()
+        public async Task GivenMultipleTemplates_WhenRetrievingTemplates_ThenReturnsTemplateWithMostMatchedFields()
         {
             Mock<IRequest> mockrequest = new Mock<IRequest>();
             mockrequest.Setup(x => x.GetProperties()).Returns(new[] { "a", "b", "c" });
@@ -43,17 +45,18 @@ namespace Faker.Tests
             Mock<ITemplateContainer<ITemplate>> mockTemplateContainer = new Mock<ITemplateContainer<ITemplate>>();
             mockTemplateContainer.Setup(x => x.Templates).Returns(new[] { templateOne, templateTwo, templateThree, expectedTemplate }.ToList());
 
-            mockTemplateStore.Setup(x => x.GetTemplateContainer(It.IsAny<Uri>())).Returns(mockTemplateContainer.Object);
+            mockTemplateStore.Setup(x => x.GetTemplateContainerAsync(It.IsAny<Uri>(), CancellationToken.None))
+                             .ReturnsAsync(mockTemplateContainer.Object);
 
             TemplateMatcher<ITemplate> templateMatcher = new TemplateMatcher<ITemplate>(mockTemplateStore.Object);
 
-            var actualTemplate = templateMatcher.Match(new Uri("http://anything"), mockrequest.Object);
+            var actualTemplate = await templateMatcher.MatchAsync(new Uri("http://anything"), mockrequest.Object, CancellationToken.None);
 
             Assert.That(actualTemplate, Is.EqualTo(expectedTemplate));
         }
 
         [Test]
-        public void GivenMultipleTemplates_WhenRetrievingTemplates_ThenReturnsTemplateWithMatchingMetaData()
+        public async Task GivenMultipleTemplates_WhenRetrievingTemplates_ThenReturnsTemplateWithMatchingMetaData()
         {
             Mock<IRequest> mockrequest = new Mock<IRequest>();
             mockrequest.Setup(x => x.GetProperties()).Returns(new[] { "a", "b", "c" });
@@ -81,18 +84,17 @@ namespace Faker.Tests
             Mock<ITemplateStore<ITemplate>> mockTemplateStore = new Mock<ITemplateStore<ITemplate>>();
             Mock<ITemplateContainer<ITemplate>> mockTemplateContainer = new Mock<ITemplateContainer<ITemplate>>();
             mockTemplateContainer.Setup(x => x.Templates).Returns(new[] { expectedTemplate, template }.ToList());
-            mockTemplateStore.Setup(x => x.GetTemplateContainer(It.IsAny<Uri>())).Returns(mockTemplateContainer.Object);
+            mockTemplateStore.Setup(x => x.GetTemplateContainerAsync(It.IsAny<Uri>(), CancellationToken.None)).ReturnsAsync(mockTemplateContainer.Object);
 
             TemplateMatcher<ITemplate> templateMatcher = new TemplateMatcher<ITemplate>(mockTemplateStore.Object);
 
-            var actualTemplate = templateMatcher.Match(new Uri("http://anything"),
-                                                       mockrequest.Object);
+            var actualTemplate = await templateMatcher.MatchAsync(new Uri("http://anything"), mockrequest.Object, CancellationToken.None);
 
             Assert.That(actualTemplate, Is.EqualTo(expectedTemplate));
         }
 
         [Test]
-        public void GivenUnkownTemplate_WhenRetrievingTemplates_ThenReturnsNoTemplate()
+        public async Task GivenUnkownTemplate_WhenRetrievingTemplates_ThenReturnsNoTemplate()
         {
             Mock<IRequest> mockrequest = new Mock<IRequest>();
             mockrequest.Setup(x => x.GetProperties()).Returns(new[] { "fgh", "fghf", "rtr" });
@@ -102,11 +104,11 @@ namespace Faker.Tests
             Mock<ITemplateStore<ITemplate>> mockTemplateStore = new Mock<ITemplateStore<ITemplate>>();
             Mock<ITemplateContainer<ITemplate>> mockTemplateContainer = new Mock<ITemplateContainer<ITemplate>>();
             mockTemplateContainer.Setup(x => x.Templates).Returns(new[] { template }.ToList());
-            mockTemplateStore.Setup(x => x.GetTemplateContainer(It.IsAny<Uri>())).Returns(mockTemplateContainer.Object);
+            mockTemplateStore.Setup(x => x.GetTemplateContainerAsync(It.IsAny<Uri>(), CancellationToken.None)).ReturnsAsync(mockTemplateContainer.Object);
 
             TemplateMatcher<ITemplate> templateMatcher = new TemplateMatcher<ITemplate>(mockTemplateStore.Object);
 
-            var actualTemplate = templateMatcher.Match(new Uri("http://anything"), mockrequest.Object);
+            var actualTemplate = await templateMatcher.MatchAsync(new Uri("http://anything"), mockrequest.Object, CancellationToken.None);
 
             Assert.That(actualTemplate, Is.Null);
         }
